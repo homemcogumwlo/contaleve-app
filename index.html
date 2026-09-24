@@ -26,10 +26,9 @@
     <main class="max-w-4xl mx-auto px-4 py-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumo deste mês</h2>
 
-        <!-- NOVO: Cartão da Última Fatura Detalhado -->
+        <!-- Cartão da Última Fatura -->
         <div id="card-fatura" class="hidden bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl shadow-xl p-6 mb-8 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
-            
             <div class="flex justify-between items-start mb-4 relative z-10">
                 <div>
                     <p class="text-emerald-100 text-xs font-bold uppercase tracking-wider">Última Fatura Analisada</p>
@@ -37,7 +36,6 @@
                 </div>
                 <span class="text-4xl">🧾</span>
             </div>
-
             <div class="grid grid-cols-2 gap-4 mb-4 relative z-10">
                 <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-3">
                     <p class="text-emerald-100 text-xs">Valor Total</p>
@@ -48,8 +46,6 @@
                     <p class="text-2xl font-bold" id="fatura-consumo">0 kWh</p>
                 </div>
             </div>
-
-            <!-- Detalhes de Pagamento -->
             <div class="bg-black bg-opacity-20 rounded-xl p-4 space-y-3 relative z-10">
                 <div class="flex justify-between items-center border-b border-white border-opacity-10 pb-2">
                     <span class="text-emerald-100 text-sm">Data da Fatura</span>
@@ -82,7 +78,7 @@
         </div>
 
         <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">📜 Histórico de Leituras</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4"> Histórico de Leituras</h3>
             <ul id="lista-historico" class="space-y-3">
                 <li class="text-gray-500 text-center py-4">A carregar...</li>
             </ul>
@@ -100,7 +96,7 @@
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Registar Leitura Manual</h3>
             <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-4">
-                <option value="agua"> Água</option>
+                <option value="agua">💧 Água</option>
                 <option value="luz">⚡ Eletricidade</option>
                 <option value="gas">🔥 Gás</option>
             </select>
@@ -112,7 +108,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Ler Fatura -->
+    <!-- MODAL: Upload de Fatura -->
     <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-2">📸 Importar Fatura</h3>
@@ -120,7 +116,8 @@
             <input type="file" id="inputFicheiro" accept="image/*,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
             <div id="loadingIA" class="hidden text-center py-4">
                 <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto mb-3"></div>
-                <p class="text-green-700 font-medium">A IA está a ler a fatura...</p>
+                <p class="text-green-700 font-medium">A IA está a analisar a fatura...</p>
+                <p class="text-xs text-gray-500 mt-1">A extrair valores, datas e referências</p>
             </div>
             <div class="flex justify-end gap-3 mt-4">
                 <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
@@ -129,138 +126,63 @@
         </div>
     </div>
 
+    <!-- NOVO MODAL: Confirmação de Dados da Fatura -->
+    <div id="modalConfirmacao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">✅ Dados Detetados</h3>
+                <button onclick="fecharModais()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">A IA detetou os seguintes dados. Podes confirmar ou corrigir antes de guardar.</p>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                    <select id="conf-tipo" class="block w-full border border-gray-300 rounded-lg p-2">
+                        <option value="agua">💧 Água</option>
+                        <option value="luz">⚡ Eletricidade</option>
+                        <option value="gas">🔥 Gás</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
+                    <input type="text" id="conf-fornecedor" class="block w-full border border-gray-300 rounded-lg p-2">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Valor (€)</label>
+                        <input type="number" step="0.01" id="conf-valor" class="block w-full border border-gray-300 rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Consumo</label>
+                        <input type="number" id="conf-consumo" class="block w-full border border-gray-300 rounded-lg p-2">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Fatura</label>
+                        <input type="date" id="conf-data" class="block w-full border border-gray-300 rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prazo Limite</label>
+                        <input type="date" id="conf-limite" class="block w-full border border-gray-300 rounded-lg p-2">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Referência Pagamento</label>
+                    <input type="text" id="conf-referencia" class="block w-full border border-gray-300 rounded-lg p-2 font-mono" placeholder="123 456 789">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                <button onclick="confirmarFatura()" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md">✓ Confirmar e Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function fecharModais() {
             document.getElementById('modalLeitura').classList.add('hidden');
             document.getElementById('modalFatura').classList.add('hidden');
-            document.getElementById('loadingIA').classList.add('hidden');
-            document.getElementById('inputFicheiro').value = '';
-        }
-        function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
-        function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
-
-        // Função para formatar data (YYYY-MM-DD -> DD/MM/YYYY)
-        function formatarData(dataStr) {
-            if (!dataStr) return '--/--/----';
-            const partes = dataStr.split('-');
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
-
-        async function carregarUltimaFatura() {
-            try {
-                const resposta = await fetch('/api/ultima-fatura');
-                const fatura = await resposta.json();
-                
-                if (fatura) {
-                    document.getElementById('card-fatura').classList.remove('hidden');
-                    document.getElementById('fatura-fornecedor').innerText = fatura.fornecedor;
-                    document.getElementById('fatura-valor').innerText = fatura.valor_total.toFixed(2) + ' €';
-                    document.getElementById('fatura-consumo').innerText = fatura.consumo + ' ' + (fatura.tipo === 'agua' ? 'm³' : 'kWh');
-                    document.getElementById('fatura-data').innerText = formatarData(fatura.data_fatura);
-                    document.getElementById('fatura-limite').innerText = formatarData(fatura.data_limite);
-                    document.getElementById('fatura-ref').innerText = fatura.referencia_pagamento || '--- --- ---';
-                }
-            } catch (e) { console.error('Erro ao carregar fatura:', e); }
-        }
-
-        async function carregarDados() {
-            try {
-                const resposta = await fetch('/api/leituras');
-                const dados = await resposta.json();
-                let agua = '0 m³', luz = '0 kWh', gas = '0 kWh';
-                dados.forEach(d => {
-                    if(d.tipo === 'agua') agua = d.valor_atual + ' ' + d.unidade;
-                    if(d.tipo === 'luz') luz = d.valor_atual + ' ' + d.unidade;
-                    if(d.tipo === 'gas') gas = d.valor_atual + ' ' + d.unidade;
-                });
-                document.getElementById('val-agua').innerText = agua;
-                document.getElementById('val-luz').innerText = luz;
-                document.getElementById('val-gas').innerText = gas;
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function carregarHistorico() {
-            try {
-                const resposta = await fetch('/api/historico');
-                const dados = await resposta.json();
-                const lista = document.getElementById('lista-historico');
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
-                    return;
-                }
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
-                const cores = { agua: 'bg-blue-50', luz: 'bg-yellow-50', gas: 'bg-orange-50' };
-                lista.innerHTML = dados.map(d => `
-                    <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl">${icones[d.tipo]}</span>
-                            <div>
-                                <p class="font-bold text-gray-800 capitalize">${d.tipo}</p>
-                                <p class="text-xs text-gray-500">${d.data_leitura}</p>
-                            </div>
-                        </div>
-                        <p class="font-bold text-gray-800">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
-                    </li>
-                `).join('');
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function guardarLeitura() {
-            const tipo = document.getElementById('tipoContador').value;
-            const valor = document.getElementById('valorContador').value;
-            const btn = document.getElementById('btnGuardar');
-            if (!valor) { alert('⚠️ Escreve um valor.'); return; }
-            btn.innerText = 'A guardar...'; btn.disabled = true;
-            try {
-                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
-                const dados = await resposta.json();
-                if (dados.sucesso) {
-                    alert('✅ Guardado!');
-                    fecharModais();
-                    carregarDados();
-                    carregarHistorico();
-                }
-            } catch (erro) { alert('Erro: ' + erro.message); }
-            finally { btn.innerText = 'Guardar'; btn.disabled = false; }
-        }
-
-        async function processarFatura() {
-            const ficheiro = document.getElementById('inputFicheiro').files[0];
-            if (!ficheiro) { alert('⚠️ Por favor, seleciona um ficheiro primeiro.'); return; }
-            document.getElementById('loadingIA').classList.remove('hidden');
-            document.getElementById('btnProcessar').classList.add('hidden');
-            
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64String = e.target.result;
-                setTimeout(async () => {
-                    // Simulação de dados extraídos pela IA
-                    const dadosSimuladosIA = {
-                        tipo: 'luz', 
-                        fornecedor: 'EDP Comercial', 
-                        valor: 87.42, 
-                        consumo: 215,
-                        data_fatura: '2026-09-01',
-                        data_limite: '2026-10-10',
-                        referencia: '123 456 789',
-                        imagem: base64String.substring(0, 100)
-                    };
-                    try {
-                        const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosSimuladosIA) });
-                        if (resposta.ok) {
-                            alert('🎉 Sucesso! Fatura processada.');
-                            fecharModais();
-                            carregarDados();
-                            carregarHistorico();
-                            carregarUltimaFatura();
-                        }
-                    } catch (err) { alert('Erro ao guardar: ' + err.message); fecharModais(); }
-                }, 2000);
-            };
-            reader.readAsDataURL(ficheiro);
-        }
-
-        window.onload = () => { carregarDados(); carregarHistorico(); carregarUltimaFatura(); };
-    </script>
-</body>
-</html>
+            document.getElementById
