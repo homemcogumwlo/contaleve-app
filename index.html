@@ -26,7 +26,6 @@
     <main class="max-w-4xl mx-auto px-4 py-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumo deste mês</h2>
 
-        <!-- Cartão da Última Fatura -->
         <div id="card-fatura" class="hidden bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl shadow-xl p-6 mb-8 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
             <div class="flex justify-between items-start mb-4 relative z-10">
@@ -78,7 +77,7 @@
         </div>
 
         <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4"> Histórico de Leituras</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📜 Histórico de Leituras</h3>
             <ul id="lista-historico" class="space-y-3">
                 <li class="text-gray-500 text-center py-4">A carregar...</li>
             </ul>
@@ -91,7 +90,6 @@
         </svg>
     </button>
 
-    <!-- MODAL: Leitura Manual -->
     <div id="modalLeitura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Registar Leitura Manual</h3>
@@ -108,39 +106,36 @@
         </div>
     </div>
 
-    <!-- MODAL: Upload de Fatura -->
     <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-2">📸 Importar Fatura</h3>
-            <p class="text-sm text-gray-500 mb-4">Tira uma foto ou escolhe o PDF da tua fatura.</p>
-            <input type="file" id="inputFicheiro" accept="image/*,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
+            <p class="text-sm text-gray-500 mb-4">Tira uma foto nítida da fatura.</p>
+            <input type="file" id="inputFicheiro" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
             <div id="loadingIA" class="hidden text-center py-4">
                 <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto mb-3"></div>
-                <p class="text-green-700 font-medium">A IA está a analisar a fatura...</p>
-                <p class="text-xs text-gray-500 mt-1">A extrair valores, datas e referências</p>
+                <p class="text-green-700 font-medium">A IA está a analisar a imagem...</p>
+                <p class="text-xs text-gray-500 mt-1">Isto pode demorar 10-20 segundos</p>
             </div>
             <div class="flex justify-end gap-3 mt-4">
                 <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
-                <button id="btnProcessar" onclick="processarFatura()" class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md">Analisar</button>
+                <button id="btnProcessar" onclick="processarFatura()" class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md">Analisar com IA</button>
             </div>
         </div>
     </div>
 
-    <!-- NOVO MODAL: Confirmação de Dados da Fatura -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">✅ Dados Detetados</h3>
+                <h3 class="text-xl font-bold text-gray-800">✅ Dados Detetados pela IA</h3>
                 <button onclick="fecharModais()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
-            <p class="text-sm text-gray-500 mb-4">A IA detetou os seguintes dados. Podes confirmar ou corrigir antes de guardar.</p>
-            
+            <p class="text-sm text-gray-500 mb-4">A IA extraiu estes dados. Confirme ou corrija antes de guardar.</p>
             <div class="space-y-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select id="conf-tipo" class="block w-full border border-gray-300 rounded-lg p-2">
                         <option value="agua">💧 Água</option>
-                        <option value="luz">⚡ Eletricidade</option>
+                        <option value="luz"> Eletricidade</option>
                         <option value="gas">🔥 Gás</option>
                     </select>
                 </div>
@@ -173,7 +168,6 @@
                     <input type="text" id="conf-referencia" class="block w-full border border-gray-300 rounded-lg p-2 font-mono" placeholder="123 456 789">
                 </div>
             </div>
-
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
                 <button onclick="confirmarFatura()" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md">✓ Confirmar e Guardar</button>
@@ -194,9 +188,10 @@
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
 
         function formatarData(dataStr) {
-            if (!dataStr) return '--/--/----';
+            if (!dataStr || dataStr === 'null') return '--/--/----';
             const partes = dataStr.split('-');
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return dataStr;
         }
 
         async function carregarUltimaFatura() {
@@ -206,8 +201,8 @@
                 if (fatura) {
                     document.getElementById('card-fatura').classList.remove('hidden');
                     document.getElementById('fatura-fornecedor').innerText = fatura.fornecedor;
-                    document.getElementById('fatura-valor').innerText = fatura.valor_total.toFixed(2) + ' €';
-                    document.getElementById('fatura-consumo').innerText = fatura.consumo + ' ' + (fatura.tipo === 'agua' ? 'm³' : 'kWh');
+                    document.getElementById('fatura-valor').innerText = (fatura.valor_total || 0).toFixed(2) + ' €';
+                    document.getElementById('fatura-consumo').innerText = (fatura.consumo || 0) + ' ' + (fatura.tipo === 'agua' ? 'm³' : 'kWh');
                     document.getElementById('fatura-data').innerText = formatarData(fatura.data_fatura);
                     document.getElementById('fatura-limite').innerText = formatarData(fatura.data_limite);
                     document.getElementById('fatura-ref').innerText = fatura.referencia_pagamento || '--- --- ---';
@@ -261,7 +256,7 @@
             const tipo = document.getElementById('tipoContador').value;
             const valor = document.getElementById('valorContador').value;
             const btn = document.getElementById('btnGuardar');
-            if (!valor) { alert('️ Escreve um valor.'); return; }
+            if (!valor) { alert('⚠️ Escreve um valor.'); return; }
             btn.innerText = 'A guardar...'; btn.disabled = true;
             try {
                 const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
@@ -276,63 +271,68 @@
             finally { btn.innerText = 'Guardar'; btn.disabled = false; }
         }
 
+        // NOVO: Função real de processamento com IA
         async function processarFatura() {
             const ficheiro = document.getElementById('inputFicheiro').files[0];
-            if (!ficheiro) { alert('⚠️ Por favor, seleciona um ficheiro primeiro.'); return; }
+            if (!ficheiro) { alert('⚠️ Por favor, seleciona uma imagem primeiro.'); return; }
             
             document.getElementById('loadingIA').classList.remove('hidden');
             document.getElementById('btnProcessar').classList.add('hidden');
             
-            setTimeout(() => {
-                // Simulação de dados que a IA "leu" (valores realistas de exemplo)
-                const dadosSimulados = {
-                    tipo: 'luz',
-                    fornecedor: 'EDP Comercial',
-                    valor: 87.42,
-                    consumo: 215,
-                    data_fatura: '2026-09-15',
-                    data_limite: '2026-10-05',
-                    referencia: '123 456 789'
-                };
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64String = e.target.result;
                 
-                // Preencher o formulário de confirmação com os dados "lidos"
-                document.getElementById('conf-tipo').value = dadosSimulados.tipo;
-                document.getElementById('conf-fornecedor').value = dadosSimulados.fornecedor;
-                document.getElementById('conf-valor').value = dadosSimulados.valor;
-                document.getElementById('conf-consumo').value = dadosSimulados.consumo;
-                document.getElementById('conf-data').value = dadosSimulados.data_fatura;
-                document.getElementById('conf-limite').value = dadosSimulados.data_limite;
-                document.getElementById('conf-referencia').value = dadosSimulados.referencia;
-                
-                // Fechar o modal de upload e abrir o de confirmação
-                document.getElementById('modalFatura').classList.add('hidden');
-                document.getElementById('modalConfirmacao').classList.remove('hidden');
-            }, 2000);
+                try {
+                    // Envia a imagem real para a nossa API que usa a IA
+                    const resposta = await fetch('/api/fatura', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imagem: base64String })
+                    });
+                    
+                    const resultado = await resposta.json();
+                    
+                    if (resultado.sucesso && resultado.dados) {
+                        const d = resultado.dados;
+                        // Preenche o formulário de confirmação com o que a IA viu
+                        document.getElementById('conf-tipo').value = d.tipo || 'luz';
+                        document.getElementById('conf-fornecedor').value = d.fornecedor || '';
+                        document.getElementById('conf-valor').value = d.valor || '';
+                        document.getElementById('conf-consumo').value = d.consumo || '';
+                        document.getElementById('conf-data').value = d.data_fatura || '';
+                        document.getElementById('conf-limite').value = d.data_limite || '';
+                        document.getElementById('conf-referencia').value = d.referencia || '';
+                        
+                        document.getElementById('modalFatura').classList.add('hidden');
+                        document.getElementById('modalConfirmacao').classList.remove('hidden');
+                    } else {
+                        alert(' A IA não conseguiu ler a imagem. Tente uma foto mais nítida.');
+                        fecharModais();
+                    }
+                } catch (err) {
+                    alert('Erro de conexão: ' + err.message);
+                    fecharModais();
+                }
+            };
+            reader.readAsDataURL(ficheiro);
         }
 
         async function confirmarFatura() {
             const dados = {
                 tipo: document.getElementById('conf-tipo').value,
                 fornecedor: document.getElementById('conf-fornecedor').value,
-                valor: parseFloat(document.getElementById('conf-valor').value),
-                consumo: parseFloat(document.getElementById('conf-consumo').value),
+                valor: parseFloat(document.getElementById('conf-valor').value) || 0,
+                consumo: parseFloat(document.getElementById('conf-consumo').value) || 0,
                 data_fatura: document.getElementById('conf-data').value,
                 data_limite: document.getElementById('conf-limite').value,
                 referencia: document.getElementById('conf-referencia').value
             };
 
-            if (!dados.fornecedor || !dados.valor || !dados.data_fatura) {
-                alert('⚠️ Por favor, preenche pelo menos o fornecedor, valor e data.');
-                return;
-            }
+            if (!dados.fornecedor) { alert('⚠️ Por favor, preenche o fornecedor.'); return; }
 
             try {
-                const resposta = await fetch('/api/fatura', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados)
-                });
-                
+                const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...dados, imagem: 'confirmada'}) });
                 if (resposta.ok) {
                     alert('🎉 Fatura guardada com sucesso!');
                     fecharModais();
@@ -340,10 +340,7 @@
                     carregarHistorico();
                     carregarUltimaFatura();
                 }
-            } catch (err) {
-                alert('Erro ao guardar: ' + err.message);
-                fecharModais();
-            }
+            } catch (err) { alert('Erro ao guardar: ' + err.message); fecharModais(); }
         }
 
         window.onload = () => { carregarDados(); carregarHistorico(); carregarUltimaFatura(); };
