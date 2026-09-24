@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fundo com gradiente -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="drop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#bae6fd;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fundo circular -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+  
+  <!-- Gota de água estilizada -->
+  <path d="M256 80 C256 80, 140 220, 140 310 C140 375, 192 428, 256 428 C320 428, 372 375, 372 310 C372 220, 256 80, 256 80 Z" 
+        fill="url(#drop)" 
+        stroke="#ffffff" 
+        stroke-width="4"/>
+  
+  <!-- Raio de luz dentro da gota (eletricidade) -->
+  <path d="M270 200 L230 290 L260 290 L240 380 L300 260 L270 260 Z" 
+        fill="#fbbf24" 
+        stroke="#f59e0b" 
+        stroke-width="3"
+        stroke-linejoin="round"/>
+  
+  <!-- Brilho na gota -->
+  <ellipse cx="200" cy="250" rx="25" ry="40" fill="#ffffff" opacity="0.3" transform="rotate(-20 200 250)"/>
+</svg>
