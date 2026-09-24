@@ -109,12 +109,16 @@
     <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-2">📸 Importar Fatura</h3>
-            <p class="text-sm text-gray-500 mb-4">Tira uma foto nítida da fatura.</p>
-            <input type="file" id="inputFicheiro" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
+            <p class="text-sm text-gray-500 mb-4">Selecione as fotos de todas as páginas da fatura.</p>
+            
+            <!-- NOVO: Input com 'multiple' para várias fotos -->
+            <input type="file" id="inputFicheiro" accept="image/*" multiple class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-2"/>
+            <p id="contadorFicheiros" class="text-xs text-blue-600 font-bold mb-4 hidden">0 imagens selecionadas</p>
+            
             <div id="loadingIA" class="hidden text-center py-4">
                 <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto mb-3"></div>
-                <p class="text-green-700 font-medium">A IA está a analisar a imagem...</p>
-                <p class="text-xs text-gray-500 mt-1">Isto pode demorar 10-20 segundos</p>
+                <p class="text-green-700 font-medium">A IA está a analisar todas as páginas...</p>
+                <p class="text-xs text-gray-500 mt-1">Isto pode demorar 15-30 segundos</p>
             </div>
             <div class="flex justify-end gap-3 mt-4">
                 <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
@@ -129,13 +133,13 @@
                 <h3 class="text-xl font-bold text-gray-800">✅ Dados Detetados pela IA</h3>
                 <button onclick="fecharModais()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
-            <p class="text-sm text-gray-500 mb-4">A IA extraiu estes dados. Confirme ou corrija antes de guardar.</p>
+            <p class="text-sm text-gray-500 mb-4">A IA extraiu estes dados de todas as páginas. Confirme ou corrija.</p>
             <div class="space-y-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select id="conf-tipo" class="block w-full border border-gray-300 rounded-lg p-2">
                         <option value="agua">💧 Água</option>
-                        <option value="luz"> Eletricidade</option>
+                        <option value="luz">⚡ Eletricidade</option>
                         <option value="gas">🔥 Gás</option>
                     </select>
                 </div>
@@ -183,9 +187,21 @@
             document.getElementById('loadingIA').classList.add('hidden');
             document.getElementById('btnProcessar').classList.remove('hidden');
             document.getElementById('inputFicheiro').value = '';
+            document.getElementById('contadorFicheiros').classList.add('hidden');
         }
         function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
+
+        // NOVO: Mostrar quantas fotos foram selecionadas
+        document.getElementById('inputFicheiro').addEventListener('change', function(e) {
+            const contador = document.getElementById('contadorFicheiros');
+            if (e.target.files.length > 0) {
+                contador.innerText = e.target.files.length + ' imagem(ns) selecionada(s)';
+                contador.classList.remove('hidden');
+            } else {
+                contador.classList.add('hidden');
+            }
+        });
 
         function formatarData(dataStr) {
             if (!dataStr || dataStr === 'null') return '--/--/----';
@@ -235,7 +251,7 @@
                     lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
                     return;
                 }
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                const icones = { agua: '💧', luz: '', gas: '🔥' };
                 const cores = { agua: 'bg-blue-50', luz: 'bg-yellow-50', gas: 'bg-orange-50' };
                 lista.innerHTML = dados.map(d => `
                     <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
@@ -271,51 +287,59 @@
             finally { btn.innerText = 'Guardar'; btn.disabled = false; }
         }
 
-        // NOVO: Função real de processamento com IA
+        // NOVO: Processar MÚLTIPLAS imagens
         async function processarFatura() {
-            const ficheiro = document.getElementById('inputFicheiro').files[0];
-            if (!ficheiro) { alert('⚠️ Por favor, seleciona uma imagem primeiro.'); return; }
+            const ficheiros = document.getElementById('inputFicheiro').files;
+            if (ficheiros.length === 0) { alert('⚠️ Por favor, seleciona pelo menos uma imagem.'); return; }
             
             document.getElementById('loadingIA').classList.remove('hidden');
             document.getElementById('btnProcessar').classList.add('hidden');
             
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64String = e.target.result;
-                
-                try {
-                    // Envia a imagem real para a nossa API que usa a IA
-                    const resposta = await fetch('/api/fatura', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imagem: base64String })
-                    });
+            const imagensBase64 = [];
+            let lidas = 0;
+
+            // Ler todas as fotos selecionadas
+            for (let i = 0; i < ficheiros.length; i++) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    imagensBase64.push(e.target.result);
+                    lidas++;
                     
-                    const resultado = await resposta.json();
-                    
-                    if (resultado.sucesso && resultado.dados) {
-                        const d = resultado.dados;
-                        // Preenche o formulário de confirmação com o que a IA viu
-                        document.getElementById('conf-tipo').value = d.tipo || 'luz';
-                        document.getElementById('conf-fornecedor').value = d.fornecedor || '';
-                        document.getElementById('conf-valor').value = d.valor || '';
-                        document.getElementById('conf-consumo').value = d.consumo || '';
-                        document.getElementById('conf-data').value = d.data_fatura || '';
-                        document.getElementById('conf-limite').value = d.data_limite || '';
-                        document.getElementById('conf-referencia').value = d.referencia || '';
-                        
-                        document.getElementById('modalFatura').classList.add('hidden');
-                        document.getElementById('modalConfirmacao').classList.remove('hidden');
-                    } else {
-                        alert(' A IA não conseguiu ler a imagem. Tente uma foto mais nítida.');
-                        fecharModais();
+                    // Quando todas estiverem lidas, envia para a API
+                    if (lidas === ficheiros.length) {
+                        try {
+                            const resposta = await fetch('/api/fatura', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ imagens: imagensBase64 }) // Envia a lista
+                            });
+                            
+                            const resultado = await resposta.json();
+                            
+                            if (resultado.sucesso && resultado.dados) {
+                                const d = resultado.dados;
+                                document.getElementById('conf-tipo').value = d.tipo || 'luz';
+                                document.getElementById('conf-fornecedor').value = d.fornecedor || '';
+                                document.getElementById('conf-valor').value = d.valor || '';
+                                document.getElementById('conf-consumo').value = d.consumo || '';
+                                document.getElementById('conf-data').value = d.data_fatura || '';
+                                document.getElementById('conf-limite').value = d.data_limite || '';
+                                document.getElementById('conf-referencia').value = d.referencia || '';
+                                
+                                document.getElementById('modalFatura').classList.add('hidden');
+                                document.getElementById('modalConfirmacao').classList.remove('hidden');
+                            } else {
+                                alert('️ A IA não conseguiu ler as imagens.');
+                                fecharModais();
+                            }
+                        } catch (err) {
+                            alert('Erro de conexão: ' + err.message);
+                            fecharModais();
+                        }
                     }
-                } catch (err) {
-                    alert('Erro de conexão: ' + err.message);
-                    fecharModais();
-                }
-            };
-            reader.readAsDataURL(ficheiro);
+                };
+                reader.readAsDataURL(ficheiros[i]);
+            }
         }
 
         async function confirmarFatura() {
@@ -329,10 +353,10 @@
                 referencia: document.getElementById('conf-referencia').value
             };
 
-            if (!dados.fornecedor) { alert('⚠️ Por favor, preenche o fornecedor.'); return; }
+            if (!dados.fornecedor) { alert('️ Por favor, preenche o fornecedor.'); return; }
 
             try {
-                const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...dados, imagem: 'confirmada'}) });
+                const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...dados, imagens: ['confirmada']}) });
                 if (resposta.ok) {
                     alert('🎉 Fatura guardada com sucesso!');
                     fecharModais();
