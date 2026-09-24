@@ -3,16 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContaLeve</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f0f9ff; color: #0c4a6e; }
-        h1 { font-size: 3em; }
-        p { font-size: 1.2em; }
-    </style>
+    <title>ContaLeve - Dashboard</title>
+    <!-- Tailwind CSS (para o design, sem instalar nada) -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>💧 ContaLeve ⚡</h1>
-    <p>As tuas contas, leves como uma pluma.</p>
-    <p><em>(A aplicação está a carregar...)</em></p>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Cabeçalho -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">💧</span>
+                <h1 class="text-xl font-bold text-gray-800">ContaLeve</h1>
+            </div>
+            <div class="text-sm text-gray-600">Olá, Utilizador 👋</div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumo deste mês</h2>
+
+        <!-- Cards de Consumo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            
+            <!-- Card Água -->
+            <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Água</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">8,5 m³</p>
+                    </div>
+                    <span class="text-3xl">🚰</span>
+                </div>
+                <p class="text-sm text-green-600 mt-3 font-medium">↓ 12% vs mês anterior</p>
+            </div>
+
+            <!-- Card Luz -->
+            <div class="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Eletricidade</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">185 kWh</p>
+                    </div>
+                    <span class="text-3xl">⚡</span>
+                </div>
+                <p class="text-sm text-red-600 mt-3 font-medium">↑ 5% vs mês anterior</p>
+            </div>
+
+            <!-- Card Gás -->
+            <div class="bg-white rounded-xl shadow p-5 border-l-4 border-orange-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Gás</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">42 kWh</p>
+                    </div>
+                    <span class="text-3xl">🔥</span>
+                </div>
+                <p class="text-sm text-green-600 mt-3 font-medium">↓ 8% vs mês anterior</p>
+            </div>
+
+        </div>
+
+        <!-- Botão de Ação -->
+        <div class="text-center">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
+                📊 Registar Nova Leitura
+            </button>
+            <p class="text-gray-500 text-sm mt-4">Próximo passo: ligar à base de dados</p>
+        </div>
+
+    </main>
+
 </body>
 </html>
