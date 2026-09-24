@@ -185,4 +185,168 @@
         function fecharModais() {
             document.getElementById('modalLeitura').classList.add('hidden');
             document.getElementById('modalFatura').classList.add('hidden');
-            document.getElementById
+            document.getElementById('modalConfirmacao').classList.add('hidden');
+            document.getElementById('loadingIA').classList.add('hidden');
+            document.getElementById('btnProcessar').classList.remove('hidden');
+            document.getElementById('inputFicheiro').value = '';
+        }
+        function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
+        function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
+
+        function formatarData(dataStr) {
+            if (!dataStr) return '--/--/----';
+            const partes = dataStr.split('-');
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
+        async function carregarUltimaFatura() {
+            try {
+                const resposta = await fetch('/api/ultima-fatura');
+                const fatura = await resposta.json();
+                if (fatura) {
+                    document.getElementById('card-fatura').classList.remove('hidden');
+                    document.getElementById('fatura-fornecedor').innerText = fatura.fornecedor;
+                    document.getElementById('fatura-valor').innerText = fatura.valor_total.toFixed(2) + ' €';
+                    document.getElementById('fatura-consumo').innerText = fatura.consumo + ' ' + (fatura.tipo === 'agua' ? 'm³' : 'kWh');
+                    document.getElementById('fatura-data').innerText = formatarData(fatura.data_fatura);
+                    document.getElementById('fatura-limite').innerText = formatarData(fatura.data_limite);
+                    document.getElementById('fatura-ref').innerText = fatura.referencia_pagamento || '--- --- ---';
+                }
+            } catch (e) { console.error('Erro:', e); }
+        }
+
+        async function carregarDados() {
+            try {
+                const resposta = await fetch('/api/leituras');
+                const dados = await resposta.json();
+                let agua = '0 m³', luz = '0 kWh', gas = '0 kWh';
+                dados.forEach(d => {
+                    if(d.tipo === 'agua') agua = d.valor_atual + ' ' + d.unidade;
+                    if(d.tipo === 'luz') luz = d.valor_atual + ' ' + d.unidade;
+                    if(d.tipo === 'gas') gas = d.valor_atual + ' ' + d.unidade;
+                });
+                document.getElementById('val-agua').innerText = agua;
+                document.getElementById('val-luz').innerText = luz;
+                document.getElementById('val-gas').innerText = gas;
+            } catch (e) { console.error('Erro:', e); }
+        }
+
+        async function carregarHistorico() {
+            try {
+                const resposta = await fetch('/api/historico');
+                const dados = await resposta.json();
+                const lista = document.getElementById('lista-historico');
+                if (dados.length === 0) {
+                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
+                    return;
+                }
+                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                const cores = { agua: 'bg-blue-50', luz: 'bg-yellow-50', gas: 'bg-orange-50' };
+                lista.innerHTML = dados.map(d => `
+                    <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">${icones[d.tipo]}</span>
+                            <div>
+                                <p class="font-bold text-gray-800 capitalize">${d.tipo}</p>
+                                <p class="text-xs text-gray-500">${d.data_leitura}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold text-gray-800">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
+                    </li>
+                `).join('');
+            } catch (e) { console.error('Erro:', e); }
+        }
+
+        async function guardarLeitura() {
+            const tipo = document.getElementById('tipoContador').value;
+            const valor = document.getElementById('valorContador').value;
+            const btn = document.getElementById('btnGuardar');
+            if (!valor) { alert('️ Escreve um valor.'); return; }
+            btn.innerText = 'A guardar...'; btn.disabled = true;
+            try {
+                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
+                const dados = await resposta.json();
+                if (dados.sucesso) {
+                    alert('✅ Guardado!');
+                    fecharModais();
+                    carregarDados();
+                    carregarHistorico();
+                }
+            } catch (erro) { alert('Erro: ' + erro.message); }
+            finally { btn.innerText = 'Guardar'; btn.disabled = false; }
+        }
+
+        async function processarFatura() {
+            const ficheiro = document.getElementById('inputFicheiro').files[0];
+            if (!ficheiro) { alert('⚠️ Por favor, seleciona um ficheiro primeiro.'); return; }
+            
+            document.getElementById('loadingIA').classList.remove('hidden');
+            document.getElementById('btnProcessar').classList.add('hidden');
+            
+            setTimeout(() => {
+                // Simulação de dados que a IA "leu" (valores realistas de exemplo)
+                const dadosSimulados = {
+                    tipo: 'luz',
+                    fornecedor: 'EDP Comercial',
+                    valor: 87.42,
+                    consumo: 215,
+                    data_fatura: '2026-09-15',
+                    data_limite: '2026-10-05',
+                    referencia: '123 456 789'
+                };
+                
+                // Preencher o formulário de confirmação com os dados "lidos"
+                document.getElementById('conf-tipo').value = dadosSimulados.tipo;
+                document.getElementById('conf-fornecedor').value = dadosSimulados.fornecedor;
+                document.getElementById('conf-valor').value = dadosSimulados.valor;
+                document.getElementById('conf-consumo').value = dadosSimulados.consumo;
+                document.getElementById('conf-data').value = dadosSimulados.data_fatura;
+                document.getElementById('conf-limite').value = dadosSimulados.data_limite;
+                document.getElementById('conf-referencia').value = dadosSimulados.referencia;
+                
+                // Fechar o modal de upload e abrir o de confirmação
+                document.getElementById('modalFatura').classList.add('hidden');
+                document.getElementById('modalConfirmacao').classList.remove('hidden');
+            }, 2000);
+        }
+
+        async function confirmarFatura() {
+            const dados = {
+                tipo: document.getElementById('conf-tipo').value,
+                fornecedor: document.getElementById('conf-fornecedor').value,
+                valor: parseFloat(document.getElementById('conf-valor').value),
+                consumo: parseFloat(document.getElementById('conf-consumo').value),
+                data_fatura: document.getElementById('conf-data').value,
+                data_limite: document.getElementById('conf-limite').value,
+                referencia: document.getElementById('conf-referencia').value
+            };
+
+            if (!dados.fornecedor || !dados.valor || !dados.data_fatura) {
+                alert('⚠️ Por favor, preenche pelo menos o fornecedor, valor e data.');
+                return;
+            }
+
+            try {
+                const resposta = await fetch('/api/fatura', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                
+                if (resposta.ok) {
+                    alert('🎉 Fatura guardada com sucesso!');
+                    fecharModais();
+                    carregarDados();
+                    carregarHistorico();
+                    carregarUltimaFatura();
+                }
+            } catch (err) {
+                alert('Erro ao guardar: ' + err.message);
+                fecharModais();
+            }
+        }
+
+        window.onload = () => { carregarDados(); carregarHistorico(); carregarUltimaFatura(); };
+    </script>
+</body>
+</html>
