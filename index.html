@@ -15,7 +15,7 @@
                 <span class="text-2xl">💧</span>
                 <h1 class="text-xl font-bold text-gray-800">ContaLeve</h1>
             </div>
-            <div class="text-sm text-gray-600">Olá, Utilizador </div>
+            <div class="text-sm text-gray-600">Olá, Utilizador 👋</div>
         </div>
     </nav>
 
@@ -27,33 +27,30 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-500 text-sm font-medium">Água</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">8,5 m³</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">A carregar...</p>
                     </div>
                     <span class="text-3xl">🚰</span>
                 </div>
-                <p class="text-sm text-green-600 mt-3 font-medium">↓ 12% vs mês anterior</p>
             </div>
 
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-500 text-sm font-medium">Eletricidade</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">185 kWh</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">A carregar...</p>
                     </div>
                     <span class="text-3xl">⚡</span>
                 </div>
-                <p class="text-sm text-red-600 mt-3 font-medium">↑ 5% vs mês anterior</p>
             </div>
 
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-orange-500">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-500 text-sm font-medium">Gás</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">42 kWh</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">A carregar...</p>
                     </div>
-                    <span class="text-3xl">🔥</span>
+                    <span class="text-3xl"></span>
                 </div>
-                <p class="text-sm text-green-600 mt-3 font-medium">↓ 8% vs mês anterior</p>
             </div>
         </div>
 
@@ -63,14 +60,12 @@
         </div>
     </main>
 
-    <!-- Botão Flutuante -->
     <button onclick="abrirModal()" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition transform hover:scale-110 flex items-center justify-center w-16 h-16">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
     </button>
 
-    <!-- Popup (Modal) -->
     <div id="modalLeitura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
             <div class="flex justify-between items-center mb-4">
@@ -79,24 +74,24 @@
             </div>
             
             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contador</label>
-            <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-4 focus:ring-blue-500 focus:border-blue-500">
+            <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-4">
                 <option value="agua">💧 Água</option>
                 <option value="luz">⚡ Eletricidade</option>
                 <option value="gas">🔥 Gás</option>
             </select>
 
             <label class="block text-sm font-medium text-gray-700 mb-1">Valor Atual do Contador</label>
-            <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-6 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: 150">
+            <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-6" placeholder="Ex: 150">
 
             <div class="flex justify-end gap-3">
-                <button onclick="fecharModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancelar</button>
-                <button id="btnGuardar" onclick="guardarLeitura()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition shadow-md">Guardar</button>
+                <button onclick="fecharModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                <button id="btnGuardar" onclick="guardarLeitura()" class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md">Guardar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Gráfico (mantido igual)
+        // 1. Gráfico (igual)
         const ctx = document.getElementById('graficoConsumo').getContext('2d');
         new Chart(ctx, {
             type: 'line',
@@ -111,50 +106,72 @@
             options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
         });
 
-        // Funções do Popup
+        // 2. Funções do Popup
         function abrirModal() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function fecharModal() { document.getElementById('modalLeitura').classList.add('hidden'); }
 
-        // NOVO: Função para enviar dados à API
+        // 3. NOVO: Carregar dados da base de dados ao abrir a página
+        async function carregarDados() {
+            try {
+                const resposta = await fetch('/api/leituras');
+                const dados = await resposta.json();
+                
+                // Valores padrão caso não haja nada na base de dados
+                let agua = '0 m³', luz = '0 kWh', gas = '0 kWh';
+                
+                // Atualiza as variáveis com o que veio da base de dados
+                dados.forEach(d => {
+                    if(d.tipo === 'agua') agua = d.valor_atual + ' ' + d.unidade;
+                    if(d.tipo === 'luz') luz = d.valor_atual + ' ' + d.unidade;
+                    if(d.tipo === 'gas') gas = d.valor_atual + ' ' + d.unidade;
+                });
+
+                // Pinta os valores nos cartões
+                document.getElementById('val-agua').innerText = agua;
+                document.getElementById('val-luz').innerText = luz;
+                document.getElementById('val-gas').innerText = gas;
+            } catch (e) {
+                console.error('Erro ao carregar:', e);
+            }
+        }
+
+        // 4. Guardar Leitura (igual, mas recarrega os dados no fim)
         async function guardarLeitura() {
             const tipo = document.getElementById('tipoContador').value;
             const valor = document.getElementById('valorContador').value;
             const btn = document.getElementById('btnGuardar');
 
-            if (!valor) {
-                alert('️ Por favor, escreve um valor.');
-                return;
-            }
+            if (!valor) { alert('⚠️ Escreve um valor.'); return; }
 
-            // Mudar o botão para mostrar que está a trabalhar
             btn.innerText = 'A guardar...';
             btn.disabled = true;
 
             try {
-                // Enviar para a nossa API na Cloudflare
                 const resposta = await fetch('/api/leitura', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tipo: tipo, valor: valor })
                 });
-
                 const dados = await resposta.json();
 
                 if (dados.sucesso) {
-                    alert('✅ Sucesso! Leitura de ' + valor + ' guardada na base de dados.');
+                    alert('✅ Guardado!');
                     document.getElementById('valorContador').value = '';
                     fecharModal();
+                    carregarDados(); // <--- ISTO É MÁGICO: Atualiza o ecrã sem recarregar a página!
                 } else {
-                    alert('❌ Erro ao guardar: ' + dados.erro);
+                    alert(' Erro: ' + dados.erro);
                 }
             } catch (erro) {
-                alert('❌ Erro de conexão: ' + erro.message);
+                alert('❌ Erro: ' + erro.message);
             } finally {
-                // Voltar o botão ao normal
                 btn.innerText = 'Guardar';
                 btn.disabled = false;
             }
         }
+
+        // Inicia o carregamento assim que a página abre
+        window.onload = carregarDados;
     </script>
 
 </body>
