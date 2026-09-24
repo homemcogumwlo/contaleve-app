@@ -6,10 +6,9 @@ export async function onRequestPost(context) {
     const id = crypto.randomUUID();
     const dataHoje = new Date().toISOString().split('T')[0];
 
-    // Guarda na tabela de faturas que criámos
     await env.DB.prepare(
-      `INSERT INTO faturas (id, tipo, fornecedor, data_fatura, valor_total, consumo, imagem_base64) VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(id, dados.tipo, dados.fornecedor, dataHoje, dados.valor, dados.consumo, 'imagem_ok').run();
+      `INSERT INTO faturas (id, tipo, fornecedor, data_fatura, valor_total, consumo, imagem_base64, data_limite, referencia_pagamento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(id, dados.tipo, dados.fornecedor, dataHoje, dados.valor, dados.consumo, 'imagem_ok', dados.data_limite, dados.referencia).run();
 
     return new Response(JSON.stringify({ sucesso: true }), {
       headers: { 'Content-Type': 'application/json' },
