@@ -6,8 +6,6 @@
     <title>ContaLeve</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2563eb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -19,7 +17,9 @@
                 <span class="text-2xl">💧</span>
                 <h1 class="text-xl font-bold text-gray-800">ContaLeve</h1>
             </div>
-            <div class="text-sm text-gray-600">Olá, Utilizador 👋</div>
+            <button onclick="abrirModalFatura()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
+                📸 Ler Fatura
+            </button>
         </div>
     </nav>
 
@@ -28,130 +28,85 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm font-medium">Água</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">A carregar...</p>
-                    </div>
-                    <span class="text-3xl">🚰</span>
-                </div>
+                <p class="text-gray-500 text-sm font-medium">Água</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">A carregar...</p>
             </div>
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm font-medium">Eletricidade</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">A carregar...</p>
-                    </div>
-                    <span class="text-3xl">⚡</span>
-                </div>
+                <p class="text-gray-500 text-sm font-medium">Eletricidade</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">A carregar...</p>
             </div>
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-orange-500">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-500 text-sm font-medium">Gás</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">A carregar...</p>
-                    </div>
-                    <span class="text-3xl">🔥</span>
-                </div>
+                <p class="text-gray-500 text-sm font-medium">Gás</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">A carregar...</p>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Evolução dos Consumos</h3>
-            <canvas id="graficoConsumo"></canvas>
-        </div>
-
-        <!-- NOVO: Secção de Histórico -->
         <div class="bg-white rounded-xl shadow p-6 mb-8">
             <h3 class="text-lg font-bold text-gray-800 mb-4"> Histórico de Leituras</h3>
             <ul id="lista-historico" class="space-y-3">
-                <li class="text-gray-500 text-center py-4">A carregar histórico...</li>
+                <li class="text-gray-500 text-center py-4">A carregar...</li>
             </ul>
         </div>
     </main>
 
-    <button onclick="abrirModal()" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition transform hover:scale-110 flex items-center justify-center w-16 h-16">
+    <!-- Botão Flutuante para Leitura Manual -->
+    <button onclick="abrirModalLeitura()" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition transform hover:scale-110 flex items-center justify-center w-16 h-16">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
     </button>
 
+    <!-- MODAL: Leitura Manual -->
     <div id="modalLeitura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Registar Leitura</h3>
-                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contador</label>
-            <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Registar Leitura Manual</h3>
+            <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-4">
                 <option value="agua">💧 Água</option>
                 <option value="luz">⚡ Eletricidade</option>
                 <option value="gas">🔥 Gás</option>
             </select>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Valor Atual do Contador</label>
-            <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-6" placeholder="Ex: 150">
+            <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-6" placeholder="Valor do contador">
             <div class="flex justify-end gap-3">
-                <button onclick="fecharModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
                 <button id="btnGuardar" onclick="guardarLeitura()" class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md">Guardar</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: Ler Fatura (Com animação de IA) -->
+    <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">📸 Importar Fatura</h3>
+            <p class="text-sm text-gray-500 mb-4">Tira uma foto ou escolhe o PDF da tua fatura.</p>
+            
+            <input type="file" id="inputFicheiro" accept="image/*,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
+            
+            <!-- Animação de Carregamento (escondida por padrão) -->
+            <div id="loadingIA" class="hidden text-center py-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto mb-3"></div>
+                <p class="text-green-700 font-medium">A IA está a ler a fatura...</p>
+                <p class="text-xs text-gray-500 mt-1">A extrair valores e datas</p>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-4">
+                <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                <button id="btnProcessar" onclick="processarFatura()" class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md">Analisar</button>
+            </div>
+        </div
+    </div>
+
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); });
+        // --- FUNÇÕES DE INTERFACE ---
+        function fecharModais() {
+            document.getElementById('modalLeitura').classList.add('hidden');
+            document.getElementById('modalFatura').classList.add('hidden');
+            document.getElementById('loadingIA').classList.add('hidden');
+            document.getElementById('inputFicheiro').value = '';
         }
+        function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
+        function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
 
-        const ctx = document.getElementById('graficoConsumo').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
-                datasets: [
-                    { label: 'Água (m³)', data: [10, 9.5, 9, 8.8, 9.2, 8.5], borderColor: 'rgb(59, 130, 246)', tension: 0.4 },
-                    { label: 'Luz (kWh)', data: [170, 175, 180, 190, 185, 185], borderColor: 'rgb(234, 179, 8)', tension: 0.4 },
-                    { label: 'Gás (kWh)', data: [55, 50, 48, 45, 43, 42], borderColor: 'rgb(249, 115, 22)', tension: 0.4 }
-                ]
-            },
-            options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
-        });
-
-        function abrirModal() { document.getElementById('modalLeitura').classList.remove('hidden'); }
-        function fecharModal() { document.getElementById('modalLeitura').classList.add('hidden'); }
-
-        // NOVO: Carregar Histórico
-        async function carregarHistorico() {
-            try {
-                const resposta = await fetch('/api/historico');
-                const dados = await resposta.json();
-                const lista = document.getElementById('lista-historico');
-                
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Ainda não há leituras registadas.</li>';
-                    return;
-                }
-
-                // Ícones para cada tipo
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
-                const cores = { agua: 'text-blue-600 bg-blue-50', luz: 'text-yellow-600 bg-yellow-50', gas: 'text-orange-600 bg-orange-50' };
-
-                lista.innerHTML = dados.map(d => `
-                    <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo] || 'bg-gray-50'}">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl">${icones[d.tipo] || ''}</span>
-                            <div>
-                                <p class="font-bold text-gray-800 capitalize">${d.tipo}</p>
-                                <p class="text-xs text-gray-500">${d.data_leitura}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-gray-800">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
-                        </div>
-                    </li>
-                `).join('');
-            } catch (e) { console.error('Erro ao carregar histórico:', e); }
-        }
-
+        // --- LÓGICA DE DADOS ---
         async function carregarDados() {
             try {
                 const resposta = await fetch('/api/leituras');
@@ -165,7 +120,33 @@
                 document.getElementById('val-agua').innerText = agua;
                 document.getElementById('val-luz').innerText = luz;
                 document.getElementById('val-gas').innerText = gas;
-            } catch (e) { console.error('Erro ao carregar:', e); }
+            } catch (e) { console.error('Erro:', e); }
+        }
+
+        async function carregarHistorico() {
+            try {
+                const resposta = await fetch('/api/historico');
+                const dados = await resposta.json();
+                const lista = document.getElementById('lista-historico');
+                if (dados.length === 0) {
+                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
+                    return;
+                }
+                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                const cores = { agua: 'bg-blue-50', luz: 'bg-yellow-50', gas: 'bg-orange-50' };
+                lista.innerHTML = dados.map(d => `
+                    <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">${icones[d.tipo]}</span>
+                            <div>
+                                <p class="font-bold text-gray-800 capitalize">${d.tipo}</p>
+                                <p class="text-xs text-gray-500">${d.data_leitura}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold text-gray-800">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
+                    </li>
+                `).join('');
+            } catch (e) { console.error('Erro:', e); }
         }
 
         async function guardarLeitura() {
@@ -173,21 +154,77 @@
             const valor = document.getElementById('valorContador').value;
             const btn = document.getElementById('btnGuardar');
             if (!valor) { alert('⚠️ Escreve um valor.'); return; }
+            
             btn.innerText = 'A guardar...'; btn.disabled = true;
             try {
-                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
+                const resposta = await fetch('/api/leitura', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ tipo: tipo, valor: valor }) 
+                });
                 const dados = await resposta.json();
                 if (dados.sucesso) {
                     alert('✅ Guardado!');
-                    document.getElementById('valorContador').value = '';
-                    fecharModal();
+                    fecharModais();
                     carregarDados();
-                    carregarHistorico(); // <--- Atualiza também o histórico!
-                } else { alert(' Erro: ' + dados.erro); }
-            } catch (erro) { alert(' Erro: ' + erro.message); }
+                    carregarHistorico();
+                }
+            } catch (erro) { alert('Erro: ' + erro.message); }
             finally { btn.innerText = 'Guardar'; btn.disabled = false; }
         }
-        
+
+        // --- NOVO: LÓGICA DE PROCESSAMENTO DE FATURA (SIMULAÇÃO IA) ---
+        async function processarFatura() {
+            const ficheiro = document.getElementById('inputFicheiro').files[0];
+            if (!ficheiro) {
+                alert('⚠️ Por favor, seleciona um ficheiro primeiro.');
+                return;
+            }
+
+            // 1. Mostrar animação de "A pensar"
+            document.getElementById('loadingIA').classList.remove('hidden');
+            document.getElementById('btnProcessar').classList.add('hidden');
+
+            // 2. Ler o ficheiro como Base64 (para guardar no D1 sem precisar do R2)
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64String = e.target.result;
+                
+                // 3. Simular tempo de processamento da IA (2 segundos)
+                setTimeout(async () => {
+                    // Aqui, no futuro, enviaríamos para a Cloudflare Workers AI.
+                    // Por agora, vamos simular que a IA leu uma fatura de LUZ.
+                    const dadosSimuladosIA = {
+                        tipo: 'luz',
+                        fornecedor: 'EDP / Endesa (Detetado)',
+                        valor: 45.50,
+                        consumo: 180,
+                        imagem: base64String.substring(0, 100) + '...' // Guardamos só o início para não encher o D1 no teste
+                    };
+
+                    // 4. Guardar na base de dados (vamos criar este endpoint a seguir)
+                    try {
+                        const resposta = await fetch('/api/fatura', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(dadosSimuladosIA)
+                        });
+                        
+                        if (resposta.ok) {
+                            alert('🎉 Sucesso! A IA detetou:\n\nFornecedor: ' + dadosSimuladosIA.fornecedor + '\nValor: ' + dadosSimuladosIA.valor + '€\nConsumo: ' + dadosSimuladosIA.consumo + ' kWh\n\nDados guardados!');
+                            fecharModais();
+                            carregarDados();
+                            carregarHistorico();
+                        }
+                    } catch (err) {
+                        alert('Erro ao guardar: ' + err.message);
+                        fecharModais();
+                    }
+                }, 2000); // 2 segundos de "magia"
+            };
+            reader.readAsDataURL(ficheiro);
+        }
+
         window.onload = () => { carregarDados(); carregarHistorico(); };
     </script>
 </body>
