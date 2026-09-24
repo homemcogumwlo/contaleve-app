@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ContaLeve - Entrar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-2">💧</div>
+            <h1 class="text-3xl font-bold text-gray-800">ContaLeve</h1>
+            <p class="text-gray-500 mt-2">As tuas contas, leves como uma pluma.</p>
+        </div>
+
+        <!-- Abas Login / Registo -->
+        <div class="flex mb-6 border-b">
+            <button onclick="mudarAba('login')" id="aba-login" class="flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600">Entrar</button>
+            <button onclick="mudarAba('registo')" id="aba-registo" class="flex-1 py-2 font-bold text-gray-400">Criar Conta</button>
+        </div>
+
+        <!-- Formulário -->
+        <form id="formAuth" onsubmit="handleAuth(event)" class="space-y-4">
+            <div id="campo-nome" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">O teu nome</label>
+                <input type="text" id="nome" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="senha" required minlength="4" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div id="mensagem-erro" class="hidden text-red-600 text-sm text-center bg-red-50 p-2 rounded"></div>
+
+            <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition">
+                Entrar
+            </button>
+        </form>
+    </div>
+
+    <script>
+        let modoAtual = 'login';
+
+        function mudarAba(modo) {
+            modoAtual = modo;
+            const campoNome = document.getElementById('campo-nome');
+            const btnSubmit = document.getElementById('btn-submit');
+            const abaLogin = document.getElementById('aba-login');
+            const abaRegisto = document.getElementById('aba-registo');
+            const msgErro = document.getElementById('mensagem-erro');
+            
+            msgErro.classList.add('hidden');
+
+            if (modo === 'registo') {
+                campoNome.classList.remove('hidden');
+                btnSubmit.innerText = 'Criar Conta Grátis';
+                abaRegisto.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaRegisto.classList.remove('text-gray-400');
+                abaLogin.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaLogin.classList.add('text-gray-400');
+            } else {
+                campoNome.classList.add('hidden');
+                btnSubmit.innerText = 'Entrar';
+                abaLogin.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaLogin.classList.remove('text-gray-400');
+                abaRegisto.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaRegisto.classList.add('text-gray-400');
+            }
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const nome = document.getElementById('nome').value;
+            const btn = document.getElementById('btn-submit');
+            const msgErro = document.getElementById('mensagem-erro');
+
+            btn.innerText = 'A processar...';
+            btn.disabled = true;
+            msgErro.classList.add('hidden');
+
+            try {
+                const resposta = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acao: modoAtual, email, senha, nome })
+                });
+
+                const dados = await resposta.json();
+
+                if (dados.sucesso) {
+                    // Guardar a sessão no telemóvel
+                    localStorage.setItem('contaleve_user_id', dados.user_id);
+                    localStorage.setItem('contaleve_user_nome', dados.nome);
+                    window.location.href = 'index.html';
+                } else {
+                    msgErro.innerText = dados.erro;
+                    msgErro.classList.remove('hidden');
+                }
+            } catch (err) {
+                msgErro.innerText = 'Erro de conexão.';
+                msgErro.classList.remove('hidden');
+            } finally {
+                btn.innerText = modoAtual === 'login' ? 'Entrar' : 'Criar Conta Grátis';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
