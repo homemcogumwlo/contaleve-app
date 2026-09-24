@@ -26,6 +26,27 @@
     <main class="max-w-4xl mx-auto px-4 py-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumo deste mês</h2>
 
+        <!-- NOVO: Cartão da Última Fatura -->
+        <div id="card-fatura" class="hidden bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 mb-8 text-white">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-green-100 text-sm font-medium">Última Fatura Analisada pela IA</p>
+                    <h3 class="text-2xl font-bold mt-1" id="fatura-fornecedor">A carregar...</h3>
+                </div>
+                <span class="text-4xl"></span>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <p class="text-green-100 text-xs">Valor Total</p>
+                    <p class="text-xl font-bold" id="fatura-valor">0,00 €</p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <p class="text-green-100 text-xs">Consumo</p>
+                    <p class="text-xl font-bold" id="fatura-consumo">0 kWh</p>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
                 <p class="text-gray-500 text-sm font-medium">Água</p>
@@ -42,14 +63,13 @@
         </div>
 
         <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4"> Histórico de Leituras</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📜 Histórico de Leituras</h3>
             <ul id="lista-historico" class="space-y-3">
                 <li class="text-gray-500 text-center py-4">A carregar...</li>
             </ul>
         </div>
     </main>
 
-    <!-- Botão Flutuante para Leitura Manual -->
     <button onclick="abrirModalLeitura()" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition transform hover:scale-110 flex items-center justify-center w-16 h-16">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -63,7 +83,7 @@
             <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-4">
                 <option value="agua">💧 Água</option>
                 <option value="luz">⚡ Eletricidade</option>
-                <option value="gas">🔥 Gás</option>
+                <option value="gas"> Gás</option>
             </select>
             <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-6" placeholder="Valor do contador">
             <div class="flex justify-end gap-3">
@@ -73,21 +93,16 @@
         </div>
     </div>
 
-    <!-- MODAL: Ler Fatura (Com animação de IA) -->
+    <!-- MODAL: Ler Fatura -->
     <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-2">📸 Importar Fatura</h3>
             <p class="text-sm text-gray-500 mb-4">Tira uma foto ou escolhe o PDF da tua fatura.</p>
-            
             <input type="file" id="inputFicheiro" accept="image/*,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
-            
-            <!-- Animação de Carregamento (escondida por padrão) -->
             <div id="loadingIA" class="hidden text-center py-4">
                 <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto mb-3"></div>
                 <p class="text-green-700 font-medium">A IA está a ler a fatura...</p>
-                <p class="text-xs text-gray-500 mt-1">A extrair valores e datas</p>
             </div>
-
             <div class="flex justify-end gap-3 mt-4">
                 <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
                 <button id="btnProcessar" onclick="processarFatura()" class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md">Analisar</button>
@@ -96,7 +111,6 @@
     </div>
 
     <script>
-        // --- FUNÇÕES DE INTERFACE ---
         function fecharModais() {
             document.getElementById('modalLeitura').classList.add('hidden');
             document.getElementById('modalFatura').classList.add('hidden');
@@ -106,7 +120,21 @@
         function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
 
-        // --- LÓGICA DE DADOS ---
+        // NOVO: Carregar Última Fatura
+        async function carregarUltimaFatura() {
+            try {
+                const resposta = await fetch('/api/ultima-fatura');
+                const fatura = await resposta.json();
+                
+                if (fatura) {
+                    document.getElementById('card-fatura').classList.remove('hidden');
+                    document.getElementById('fatura-fornecedor').innerText = fatura.fornecedor;
+                    document.getElementById('fatura-valor').innerText = fatura.valor_total.toFixed(2) + ' €';
+                    document.getElementById('fatura-consumo').innerText = fatura.consumo + ' ' + (fatura.tipo === 'agua' ? 'm³' : 'kWh');
+                }
+            } catch (e) { console.error('Erro ao carregar fatura:', e); }
+        }
+
         async function carregarDados() {
             try {
                 const resposta = await fetch('/api/leituras');
@@ -154,14 +182,9 @@
             const valor = document.getElementById('valorContador').value;
             const btn = document.getElementById('btnGuardar');
             if (!valor) { alert('⚠️ Escreve um valor.'); return; }
-            
             btn.innerText = 'A guardar...'; btn.disabled = true;
             try {
-                const resposta = await fetch('/api/leitura', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ tipo: tipo, valor: valor }) 
-                });
+                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
                 const dados = await resposta.json();
                 if (dados.sucesso) {
                     alert('✅ Guardado!');
@@ -173,59 +196,35 @@
             finally { btn.innerText = 'Guardar'; btn.disabled = false; }
         }
 
-        // --- NOVO: LÓGICA DE PROCESSAMENTO DE FATURA (SIMULAÇÃO IA) ---
         async function processarFatura() {
             const ficheiro = document.getElementById('inputFicheiro').files[0];
-            if (!ficheiro) {
-                alert('⚠️ Por favor, seleciona um ficheiro primeiro.');
-                return;
-            }
-
-            // 1. Mostrar animação de "A pensar"
+            if (!ficheiro) { alert('⚠️ Por favor, seleciona um ficheiro primeiro.'); return; }
             document.getElementById('loadingIA').classList.remove('hidden');
             document.getElementById('btnProcessar').classList.add('hidden');
-
-            // 2. Ler o ficheiro como Base64 (para guardar no D1 sem precisar do R2)
+            
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64String = e.target.result;
-                
-                // 3. Simular tempo de processamento da IA (2 segundos)
                 setTimeout(async () => {
-                    // Aqui, no futuro, enviaríamos para a Cloudflare Workers AI.
-                    // Por agora, vamos simular que a IA leu uma fatura de LUZ.
                     const dadosSimuladosIA = {
-                        tipo: 'luz',
-                        fornecedor: 'EDP / Endesa (Detetado)',
-                        valor: 45.50,
-                        consumo: 180,
-                        imagem: base64String.substring(0, 100) + '...' // Guardamos só o início para não encher o D1 no teste
+                        tipo: 'luz', fornecedor: 'EDP / Endesa (Detetado)', valor: 45.50, consumo: 180, imagem: base64String.substring(0, 100)
                     };
-
-                    // 4. Guardar na base de dados (vamos criar este endpoint a seguir)
                     try {
-                        const resposta = await fetch('/api/fatura', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(dadosSimuladosIA)
-                        });
-                        
+                        const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosSimuladosIA) });
                         if (resposta.ok) {
-                            alert('🎉 Sucesso! A IA detetou:\n\nFornecedor: ' + dadosSimuladosIA.fornecedor + '\nValor: ' + dadosSimuladosIA.valor + '€\nConsumo: ' + dadosSimuladosIA.consumo + ' kWh\n\nDados guardados!');
+                            alert('🎉 Sucesso! Fatura processada e guardada.');
                             fecharModais();
                             carregarDados();
                             carregarHistorico();
+                            carregarUltimaFatura(); // <--- Atualiza o novo cartão!
                         }
-                    } catch (err) {
-                        alert('Erro ao guardar: ' + err.message);
-                        fecharModais();
-                    }
-                }, 2000); // 2 segundos de "magia"
+                    } catch (err) { alert('Erro ao guardar: ' + err.message); fecharModais(); }
+                }, 2000);
             };
             reader.readAsDataURL(ficheiro);
         }
 
-        window.onload = () => { carregarDados(); carregarHistorico(); };
+        window.onload = () => { carregarDados(); carregarHistorico(); carregarUltimaFatura(); };
     </script>
 </body>
 </html>
