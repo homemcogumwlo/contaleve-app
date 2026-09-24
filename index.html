@@ -7,6 +7,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2563eb">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
 
@@ -21,7 +22,7 @@
                     📊 Leitura
                 </button>
                 <button onclick="abrirModalFatura()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                     Fatura
+                    🧾 Fatura
                 </button>
             </div>
         </div>
@@ -45,25 +46,29 @@
             </div>
         </div>
 
-        <!-- NOVO: Secção de Faturas com Abas -->
+        <!-- NOVO: Gráfico de Gastos Mensais -->
+        <div class="bg-white rounded-xl shadow p-6 mb-8">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Gastos Mensais (Faturas Pagas)</h3>
+            <canvas id="graficoGastos"></canvas>
+        </div>
+
+        <!-- Secção de Faturas com Abas -->
         <div class="bg-white rounded-xl shadow mb-8">
             <div class="flex border-b">
                 <button onclick="mudarAba('pendentes')" id="aba-pendentes" class="flex-1 py-3 px-4 font-bold text-sm border-b-2 border-blue-500 text-blue-600">
-                     Pendentes
+                    ⏳ Pendentes
                 </button>
                 <button onclick="mudarAba('historico')" id="aba-historico" class="flex-1 py-3 px-4 font-bold text-sm text-gray-500 hover:text-gray-700">
                     📜 Histórico
                 </button>
             </div>
 
-            <!-- Conteúdo Pendentes -->
             <div id="conteudo-pendentes" class="p-6">
                 <ul id="lista-pendentes" class="space-y-3">
                     <li class="text-gray-500 text-center py-4">A carregar...</li>
                 </ul>
             </div>
 
-            <!-- Conteúdo Histórico -->
             <div id="conteudo-historico" class="p-6 hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-gray-800">Faturas Pagas</h3>
@@ -89,7 +94,7 @@
             <h3 class="text-xl font-bold text-gray-800 mb-4">Registar Leitura</h3>
             <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-4">
                 <option value="agua">💧 Água</option>
-                <option value="luz">⚡ Eletricidade</option>
+                <option value="luz"> Eletricidade</option>
                 <option value="gas">🔥 Gás</option>
             </select>
             <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-6" placeholder="Valor do contador">
@@ -104,14 +109,14 @@
     <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800"> Nova Fatura</h3>
+                <h3 class="text-xl font-bold text-gray-800">🧾 Nova Fatura</h3>
                 <button onclick="fecharModais()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
             <div class="space-y-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select id="fat-tipo" class="block w-full border border-gray-300 rounded-lg p-3">
-                        <option value="agua">💧 Água</option>
+                        <option value="agua"> Água</option>
                         <option value="luz">⚡ Eletricidade</option>
                         <option value="gas">🔥 Gás</option>
                     </select>
@@ -161,6 +166,8 @@
     </div>
 
     <script>
+        let graficoGastos; // Variável global para o gráfico
+
         function fecharModais() {
             document.getElementById('modalLeitura').classList.add('hidden');
             document.getElementById('modalFatura').classList.add('hidden');
@@ -168,7 +175,6 @@
         function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
 
-        // NOVO: Sistema de Abas
         function mudarAba(aba) {
             const pendentes = document.getElementById('conteudo-pendentes');
             const historico = document.getElementById('conteudo-historico');
@@ -189,7 +195,7 @@
                 abaHistorico.classList.remove('text-gray-500');
                 abaPendentes.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
                 abaPendentes.classList.add('text-gray-500');
-                carregarHistoricoFaturas(); // Carrega o histórico quando muda para esta aba
+                carregarHistoricoFaturas();
             }
         }
 
@@ -209,6 +215,59 @@
             return dataStr;
         }
 
+        // NOVO: Carregar e Desenhar Gráfico de Gastos
+        async function carregarGastosMensais() {
+            try {
+                const resposta = await fetch('/api/gastos-mensais');
+                const dados = await resposta.json();
+                
+                // Organizar dados por mês
+                const meses = [...new Set(dados.map(d => d.mes))].sort();
+                const dadosAgua = meses.map(m => {
+                    const item = dados.find(d => d.mes === m && d.tipo === 'agua');
+                    return item ? item.total : 0;
+                });
+                const dadosLuz = meses.map(m => {
+                    const item = dados.find(d => d.mes === m && d.tipo === 'luz');
+                    return item ? item.total : 0;
+                });
+                const dadosGas = meses.map(m => {
+                    const item = dados.find(d => d.mes === m && d.tipo === 'gas');
+                    return item ? item.total : 0;
+                });
+
+                // Formatar meses para exibição (ex: 2026-09 -> Set 2026)
+                const mesesFormatados = meses.map(m => {
+                    const [ano, mes] = m.split('-');
+                    const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                    return `${nomesMeses[parseInt(mes)-1]} ${ano}`;
+                });
+
+                // Criar ou atualizar gráfico
+                const ctx = document.getElementById('graficoGastos').getContext('2d');
+                if (graficoGastos) {
+                    graficoGastos.destroy();
+                }
+                
+                graficoGastos = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: mesesFormatados,
+                        datasets: [
+                            { label: 'Água', data: dadosAgua, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 },
+                            { label: 'Luz', data: dadosLuz, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderColor: 'rgb(234, 179, 8)', borderWidth: 1 },
+                            { label: 'Gás', data: dadosGas, backgroundColor: 'rgba(249, 115, 22, 0.8)', borderColor: 'rgb(249, 115, 22)', borderWidth: 1 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top' } },
+                        scales: { y: { beginAtZero: true, ticks: { callback: v => v + '€' } } }
+                    }
+                });
+            } catch (e) { console.error('Erro ao carregar gastos:', e); }
+        }
+
         async function carregarPendentes() {
             try {
                 const resposta = await fetch('/api/pendentes');
@@ -220,14 +279,14 @@
                     return;
                 }
 
-                const icones = { agua: '💧', luz: '', gas: '🔥' };
+                const icones = { agua: '💧', luz: '⚡', gas: '' };
                 
                 lista.innerHTML = dados.map(f => {
                     const dias = diasRestantes(f.data_limite);
                     let corFundo = 'bg-gray-50';
                     let aviso = '';
 
-                    if (dias < 0) { corFundo = 'bg-red-100 border-l-4 border-red-500'; aviso = `⚠️ Atrasada há ${Math.abs(dias)} dias!`; }
+                    if (dias < 0) { corFundo = 'bg-red-100 border-l-4 border-red-500'; aviso = `️ Atrasada há ${Math.abs(dias)} dias!`; }
                     else if (dias <= 3) { corFundo = 'bg-red-50 border-l-4 border-orange-500'; aviso = `🔥 Vence em ${dias} dia(s)!`; }
                     else if (dias <= 7) { corFundo = 'bg-yellow-50 border-l-4 border-yellow-500'; aviso = `⏳ Vence em ${dias} dias`; }
 
@@ -252,7 +311,6 @@
             } catch (e) { console.error('Erro:', e); }
         }
 
-        // NOVO: Carregar Histórico de Faturas Pagas
         async function carregarHistoricoFaturas() {
             try {
                 const resposta = await fetch('/api/historico-faturas');
@@ -265,7 +323,7 @@
                     return;
                 }
 
-                const icones = { agua: '💧', luz: '', gas: '🔥' };
+                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
                 let total = 0;
 
                 lista.innerHTML = dados.map(f => {
@@ -292,6 +350,7 @@
             try {
                 await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
                 carregarPendentes();
+                carregarGastosMensais(); // Atualiza o gráfico
             } catch (e) { alert('Erro ao marcar.'); }
         }
 
@@ -320,7 +379,7 @@
                     lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
                     return;
                 }
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                const icones = { agua: '💧', luz: '', gas: '🔥' };
                 const cores = { agua: 'bg-blue-50', luz: 'bg-yellow-50', gas: 'bg-orange-50' };
                 lista.innerHTML = dados.map(d => `
                     <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
@@ -370,7 +429,7 @@
             try {
                 const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) });
                 if (resposta.ok) {
-                    alert(' Fatura guardada!');
+                    alert('🎉 Fatura guardada!');
                     fecharModais();
                     document.getElementById('fat-valor').value = '';
                     carregarPendentes();
@@ -378,7 +437,12 @@
             } catch (err) { alert('Erro: ' + err.message); }
         }
 
-        window.onload = () => { carregarDados(); carregarHistorico(); carregarPendentes(); };
+        window.onload = () => { 
+            carregarDados(); 
+            carregarHistorico(); 
+            carregarPendentes(); 
+            carregarGastosMensais(); // Carrega o gráfico ao iniciar
+        };
     </script>
 </body>
 </html>
