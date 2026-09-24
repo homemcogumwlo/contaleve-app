@@ -2,8 +2,15 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContaLeve - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ContaLeve</title>
+    
+    <!-- NOVO: Configurações de PWA para telemóvel -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -49,7 +56,7 @@
                         <p class="text-gray-500 text-sm font-medium">Gás</p>
                         <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">A carregar...</p>
                     </div>
-                    <span class="text-3xl"></span>
+                    <span class="text-3xl">🔥</span>
                 </div>
             </div>
         </div>
@@ -77,7 +84,7 @@
             <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-4">
                 <option value="agua">💧 Água</option>
                 <option value="luz">⚡ Eletricidade</option>
-                <option value="gas">🔥 Gás</option>
+                <option value="gas"> Gás</option>
             </select>
 
             <label class="block text-sm font-medium text-gray-700 mb-1">Valor Atual do Contador</label>
@@ -91,7 +98,13 @@
     </div>
 
     <script>
-        // 1. Gráfico (igual)
+        // NOVO: Registar o Service Worker para funcionar como App
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+
         const ctx = document.getElementById('graficoConsumo').getContext('2d');
         new Chart(ctx, {
             type: 'line',
@@ -106,73 +119,44 @@
             options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
         });
 
-        // 2. Funções do Popup
         function abrirModal() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function fecharModal() { document.getElementById('modalLeitura').classList.add('hidden'); }
 
-        // 3. NOVO: Carregar dados da base de dados ao abrir a página
         async function carregarDados() {
             try {
                 const resposta = await fetch('/api/leituras');
                 const dados = await resposta.json();
-                
-                // Valores padrão caso não haja nada na base de dados
                 let agua = '0 m³', luz = '0 kWh', gas = '0 kWh';
-                
-                // Atualiza as variáveis com o que veio da base de dados
                 dados.forEach(d => {
                     if(d.tipo === 'agua') agua = d.valor_atual + ' ' + d.unidade;
                     if(d.tipo === 'luz') luz = d.valor_atual + ' ' + d.unidade;
                     if(d.tipo === 'gas') gas = d.valor_atual + ' ' + d.unidade;
                 });
-
-                // Pinta os valores nos cartões
                 document.getElementById('val-agua').innerText = agua;
                 document.getElementById('val-luz').innerText = luz;
                 document.getElementById('val-gas').innerText = gas;
-            } catch (e) {
-                console.error('Erro ao carregar:', e);
-            }
+            } catch (e) { console.error('Erro ao carregar:', e); }
         }
 
-        // 4. Guardar Leitura (igual, mas recarrega os dados no fim)
         async function guardarLeitura() {
             const tipo = document.getElementById('tipoContador').value;
             const valor = document.getElementById('valorContador').value;
             const btn = document.getElementById('btnGuardar');
-
             if (!valor) { alert('⚠️ Escreve um valor.'); return; }
-
-            btn.innerText = 'A guardar...';
-            btn.disabled = true;
-
+            btn.innerText = 'A guardar...'; btn.disabled = true;
             try {
-                const resposta = await fetch('/api/leitura', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tipo: tipo, valor: valor })
-                });
+                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
                 const dados = await resposta.json();
-
                 if (dados.sucesso) {
                     alert('✅ Guardado!');
                     document.getElementById('valorContador').value = '';
                     fecharModal();
-                    carregarDados(); // <--- ISTO É MÁGICO: Atualiza o ecrã sem recarregar a página!
-                } else {
-                    alert(' Erro: ' + dados.erro);
-                }
-            } catch (erro) {
-                alert('❌ Erro: ' + erro.message);
-            } finally {
-                btn.innerText = 'Guardar';
-                btn.disabled = false;
-            }
+                    carregarDados();
+                } else { alert(' Erro: ' + dados.erro); }
+            } catch (erro) { alert(' Erro: ' + erro.message); }
+            finally { btn.innerText = 'Guardar'; btn.disabled = false; }
         }
-
-        // Inicia o carregamento assim que a página abre
         window.onload = carregarDados;
     </script>
-
 </body>
 </html>
