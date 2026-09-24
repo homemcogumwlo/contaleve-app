@@ -26,23 +26,42 @@
     <main class="max-w-4xl mx-auto px-4 py-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumo deste mês</h2>
 
-        <!-- NOVO: Cartão da Última Fatura -->
-        <div id="card-fatura" class="hidden bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 mb-8 text-white">
-            <div class="flex justify-between items-start mb-4">
+        <!-- NOVO: Cartão da Última Fatura Detalhado -->
+        <div id="card-fatura" class="hidden bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl shadow-xl p-6 mb-8 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+            
+            <div class="flex justify-between items-start mb-4 relative z-10">
                 <div>
-                    <p class="text-green-100 text-sm font-medium">Última Fatura Analisada pela IA</p>
+                    <p class="text-emerald-100 text-xs font-bold uppercase tracking-wider">Última Fatura Analisada</p>
                     <h3 class="text-2xl font-bold mt-1" id="fatura-fornecedor">A carregar...</h3>
                 </div>
-                <span class="text-4xl"></span>
+                <span class="text-4xl">🧾</span>
             </div>
-            <div class="grid grid-cols-2 gap-4 mt-4">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <p class="text-green-100 text-xs">Valor Total</p>
-                    <p class="text-xl font-bold" id="fatura-valor">0,00 €</p>
+
+            <div class="grid grid-cols-2 gap-4 mb-4 relative z-10">
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-3">
+                    <p class="text-emerald-100 text-xs">Valor Total</p>
+                    <p class="text-2xl font-bold" id="fatura-valor">0,00 €</p>
                 </div>
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <p class="text-green-100 text-xs">Consumo</p>
-                    <p class="text-xl font-bold" id="fatura-consumo">0 kWh</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-3">
+                    <p class="text-emerald-100 text-xs">Consumo</p>
+                    <p class="text-2xl font-bold" id="fatura-consumo">0 kWh</p>
+                </div>
+            </div>
+
+            <!-- Detalhes de Pagamento -->
+            <div class="bg-black bg-opacity-20 rounded-xl p-4 space-y-3 relative z-10">
+                <div class="flex justify-between items-center border-b border-white border-opacity-10 pb-2">
+                    <span class="text-emerald-100 text-sm">Data da Fatura</span>
+                    <span class="font-bold text-sm" id="fatura-data">--/--/----</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white border-opacity-10 pb-2">
+                    <span class="text-emerald-100 text-sm">Prazo Limite</span>
+                    <span class="font-bold text-sm text-yellow-300" id="fatura-limite">--/--/----</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-emerald-100 text-sm">Ref. Pagamento</span>
+                    <span class="font-bold text-sm font-mono tracking-widest bg-white bg-opacity-20 px-2 py-1 rounded" id="fatura-ref">--- --- ---</span>
                 </div>
             </div>
         </div>
@@ -81,9 +100,9 @@
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Registar Leitura Manual</h3>
             <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-4">
-                <option value="agua">💧 Água</option>
+                <option value="agua"> Água</option>
                 <option value="luz">⚡ Eletricidade</option>
-                <option value="gas"> Gás</option>
+                <option value="gas">🔥 Gás</option>
             </select>
             <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-6" placeholder="Valor do contador">
             <div class="flex justify-end gap-3">
@@ -120,7 +139,13 @@
         function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
 
-        // NOVO: Carregar Última Fatura
+        // Função para formatar data (YYYY-MM-DD -> DD/MM/YYYY)
+        function formatarData(dataStr) {
+            if (!dataStr) return '--/--/----';
+            const partes = dataStr.split('-');
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
         async function carregarUltimaFatura() {
             try {
                 const resposta = await fetch('/api/ultima-fatura');
@@ -131,6 +156,9 @@
                     document.getElementById('fatura-fornecedor').innerText = fatura.fornecedor;
                     document.getElementById('fatura-valor').innerText = fatura.valor_total.toFixed(2) + ' €';
                     document.getElementById('fatura-consumo').innerText = fatura.consumo + ' ' + (fatura.tipo === 'agua' ? 'm³' : 'kWh');
+                    document.getElementById('fatura-data').innerText = formatarData(fatura.data_fatura);
+                    document.getElementById('fatura-limite').innerText = formatarData(fatura.data_limite);
+                    document.getElementById('fatura-ref').innerText = fatura.referencia_pagamento || '--- --- ---';
                 }
             } catch (e) { console.error('Erro ao carregar fatura:', e); }
         }
@@ -206,17 +234,25 @@
             reader.onload = async function(e) {
                 const base64String = e.target.result;
                 setTimeout(async () => {
+                    // Simulação de dados extraídos pela IA
                     const dadosSimuladosIA = {
-                        tipo: 'luz', fornecedor: 'EDP / Endesa (Detetado)', valor: 45.50, consumo: 180, imagem: base64String.substring(0, 100)
+                        tipo: 'luz', 
+                        fornecedor: 'EDP Comercial', 
+                        valor: 87.42, 
+                        consumo: 215,
+                        data_fatura: '2026-09-01',
+                        data_limite: '2026-10-10',
+                        referencia: '123 456 789',
+                        imagem: base64String.substring(0, 100)
                     };
                     try {
                         const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosSimuladosIA) });
                         if (resposta.ok) {
-                            alert('🎉 Sucesso! Fatura processada e guardada.');
+                            alert('🎉 Sucesso! Fatura processada.');
                             fecharModais();
                             carregarDados();
                             carregarHistorico();
-                            carregarUltimaFatura(); // <--- Atualiza o novo cartão!
+                            carregarUltimaFatura();
                         }
                     } catch (err) { alert('Erro ao guardar: ' + err.message); fecharModais(); }
                 }, 2000);
