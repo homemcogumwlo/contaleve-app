@@ -1,1 +1,11 @@
-
+{
+  "name": "ContaLeve - Gestão de Contas",
+  "short_name": "ContaLeve",
+  "description": "A tua aplicação para poupar em água, luz e gás.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": []
+}
