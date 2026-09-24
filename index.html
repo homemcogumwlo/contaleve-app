@@ -7,9 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen pb-20">
 
-    <nav class="bg-white shadow-sm border-b">
+    <!-- Cabeçalho -->
+    <nav class="bg-white shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <span class="text-2xl">💧</span>
@@ -19,12 +20,13 @@
         </div>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main class="max-w-4xl mx-auto px-4 py-8">
         
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumo deste mês</h2>
 
+        <!-- Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
                 <div class="flex justify-between items-start">
                     <div>
@@ -53,67 +55,88 @@
                         <p class="text-gray-500 text-sm font-medium">Gás</p>
                         <p class="text-3xl font-bold text-gray-800 mt-1">42 kWh</p>
                     </div>
-                    <span class="text-3xl"></span>
+                    <span class="text-3xl">🔥</span>
                 </div>
                 <p class="text-sm text-green-600 mt-3 font-medium">↓ 8% vs mês anterior</p>
             </div>
-
         </div>
 
-        <!-- NOVO: Gráfico de Consumos -->
+        <!-- Gráfico -->
         <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Evolução dos Consumos (últimos 6 meses)</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Evolução dos Consumos</h3>
             <canvas id="graficoConsumo"></canvas>
-        </div>
-
-        <div class="text-center">
-            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
-                 Registar Nova Leitura
-            </button>
         </div>
 
     </main>
 
+    <!-- Botão Flutuante (FAB) -->
+    <button onclick="abrirModal()" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition transform hover:scale-110 flex items-center justify-center w-16 h-16">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+    </button>
+
+    <!-- Popup (Modal) -->
+    <div id="modalLeitura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Registar Leitura</h3>
+                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contador</label>
+            <select class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-4 focus:ring-blue-500 focus:border-blue-500">
+                <option>💧 Água</option>
+                <option>⚡ Eletricidade</option>
+                <option>🔥 Gás</option>
+            </select>
+
+            <label class="block text-sm font-medium text-gray-700 mb-1">Valor Atual do Contador</label>
+            <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg shadow-sm p-3 mb-6 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: 150">
+
+            <div class="flex justify-end gap-3">
+                <button onclick="fecharModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancelar</button>
+                <button onclick="guardarLeitura()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition shadow-md">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script>
+        // Gráfico
         const ctx = document.getElementById('graficoConsumo').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
                 datasets: [
-                    {
-                        label: 'Água (m³)',
-                        data: [10, 9.5, 9, 8.8, 9.2, 8.5],
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Luz (kWh)',
-                        data: [170, 175, 180, 190, 185, 185],
-                        borderColor: 'rgb(234, 179, 8)',
-                        backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Gás (kWh)',
-                        data: [55, 50, 48, 45, 43, 42],
-                        borderColor: 'rgb(249, 115, 22)',
-                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                        tension: 0.4
-                    }
+                    { label: 'Água (m³)', data: [10, 9.5, 9, 8.8, 9.2, 8.5], borderColor: 'rgb(59, 130, 246)', tension: 0.4 },
+                    { label: 'Luz (kWh)', data: [170, 175, 180, 190, 185, 185], borderColor: 'rgb(234, 179, 8)', tension: 0.4 },
+                    { label: 'Gás (kWh)', data: [55, 50, 48, 45, 43, 42], borderColor: 'rgb(249, 115, 22)', tension: 0.4 }
                 ]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top' }
-                },
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+            options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
         });
+
+        // Lógica do Popup
+        function abrirModal() {
+            document.getElementById('modalLeitura').classList.remove('hidden');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalLeitura').classList.add('hidden');
+        }
+
+        function guardarLeitura() {
+            const valor = document.getElementById('valorContador').value;
+            if(valor) {
+                alert('✅ Leitura de ' + valor + ' registada com sucesso!\n(Em breve vamos guardar isto na base de dados real)');
+                document.getElementById('valorContador').value = '';
+                fecharModal();
+            } else {
+                alert('⚠️ Por favor, escreve um valor.');
+            }
+        }
     </script>
 
 </body>
