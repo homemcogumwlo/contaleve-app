@@ -17,7 +17,7 @@
 
         <div class="flex mb-6 border-b">
             <button onclick="mudarAba('login')" id="aba-login" class="flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600">Entrar</button>
-            <button onclick="mudarAba('registo')" id="aba-registo" class="flex-1 py-2 font-bold text-gray-400">Criar Conta</button>
+            <button onclick="mudarAba('registrar')" id="aba-registo" class="flex-1 py-2 font-bold text-gray-400">Criar Conta</button>
         </div>
 
         <form id="formAuth" onsubmit="handleAuth(event)" class="space-y-4">
@@ -74,7 +74,7 @@
             
             msgErro.classList.add('hidden');
 
-            if (modo === 'registo') {
+            if (modo === 'registrar') {
                 campoNome.classList.remove('hidden');
                 btnSubmit.innerText = 'Criar Conta Grátis';
                 abaRegisto.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
