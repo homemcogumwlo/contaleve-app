@@ -1,4 +1,3 @@
-// Função para encriptar a password (compatível com Workers)
 async function hashSenha(senha) {
   const encoder = new TextEncoder();
   const data = encoder.encode(senha);
@@ -11,11 +10,19 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
+    // VERIFICAÇÃO DE SEGURANÇA: A base de dados está ligada?
+    if (!env.DB) {
+      return new Response(JSON.stringify({ erro: 'ERRO DE CONFIGURAÇÃO: A base de dados (DB) não está ligada nas definições do Pages.' }), { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json' } 
+      });
+    }
+
     const dados = await request.json();
     const { acao, email, nome, senha } = dados;
 
     if (!acao || !email || !senha) {
-      return new Response(JSON.stringify({ erro: 'Dados em falta.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ erro: 'Dados em falta (email e senha são obrigatórios).' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
     const senhaHash = await hashSenha(senha);
@@ -49,7 +56,7 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ erro: 'Ação inválida.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
-    console.error("Erro no auth:", e);
-    return new Response(JSON.stringify({ erro: 'Erro interno: ' + e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error("ERRO REAL NO AUTH:", e);
+    return new Response(JSON.stringify({ erro: 'Erro interno do servidor: ' + e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
