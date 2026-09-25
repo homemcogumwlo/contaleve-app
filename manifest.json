@@ -1,7 +1,7 @@
 {
-  "name": "ContaLeve - Gestão de Contas",
+  "name": "ContaLeve",
   "short_name": "ContaLeve",
-  "description": "A tua app para gerir contas de água, luz e gás com inteligência.",
+  "description": "A tua app para gerir as contas de água, luz e gás com inteligência.",
   "start_url": "/login.html",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -20,5 +20,9 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "lang": "pt",
+  "categories": [
+    "utilities"
   ]
 }
