@@ -1,48 +1,55 @@
-// Função para encriptar a password
+// Função para encriptar a password (compatível com Workers)
 async function hashSenha(senha) {
-  const msgBuffer = new TextEncoder().encode(senha);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(senha);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  const dados = await request.json();
-  const { acao, email, nome, senha } = dados;
-
+  
   try {
+    const dados = await request.json();
+    const { acao, email, nome, senha } = dados;
+
+    if (!acao || !email || !senha) {
+      return new Response(JSON.stringify({ erro: 'Dados em falta.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const senhaHash = await hashSenha(senha);
 
     if (acao === 'registrar') {
-      // Verifica se o email já existe
       const existente = await env.DB.prepare("SELECT id FROM utilizadores WHERE email = ?").bind(email).first();
       if (existente) {
-        return new Response(JSON.stringify({ erro: 'Este email já está registado.' }), { status: 400 });
+        return new Response(JSON.stringify({ erro: 'Este email já está registado.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
       }
 
-      // Cria novo utilizador
       const id = crypto.randomUUID();
       await env.DB.prepare(
         "INSERT INTO utilizadores (id, email, nome, senha_hash) VALUES (?, ?, ?, ?)"
-      ).bind(id, email, nome, senhaHash).run();
+      ).bind(id, email, nome || 'Utilizador', senhaHash).run();
 
-      return new Response(JSON.stringify({ sucesso: true, user_id: id, nome: nome }));
+      return new Response(JSON.stringify({ sucesso: true, user_id: id, nome: nome || 'Utilizador' }), { headers: { 'Content-Type': 'application/json' } });
     } 
     
     else if (acao === 'login') {
-      // Procura o utilizador
       const user = await env.DB.prepare(
         "SELECT id, nome, senha_hash FROM utilizadores WHERE email = ?"
       ).bind(email).first();
 
       if (!user || user.senha_hash !== senhaHash) {
-        return new Response(JSON.stringify({ erro: 'Email ou password incorretos.' }), { status: 401 });
+        return new Response(JSON.stringify({ erro: 'Email ou password incorretos.' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
       }
 
-      return new Response(JSON.stringify({ sucesso: true, user_id: user.id, nome: user.nome }));
+      return new Response(JSON.stringify({ sucesso: true, user_id: user.id, nome: user.nome }), { headers: { 'Content-Type': 'application/json' } });
     }
+    
+    return new Response(JSON.stringify({ erro: 'Ação inválida.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
   } catch (e) {
-    return new Response(JSON.stringify({ erro: e.message }), { status: 500 });
+    console.error("Erro no auth:", e);
+    return new Response(JSON.stringify({ erro: 'Erro interno: ' + e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
