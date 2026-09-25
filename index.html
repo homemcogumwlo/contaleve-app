@@ -7,17 +7,9 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2563eb">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configurar Tailwind para usar modo escuro por classe
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: {} }
-        }
-        // Aplicar o modo guardado ANTES de renderizar (evita flash branco)
-        if (localStorage.getItem('contaleve_darkmode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: {} } }
+        if (localStorage.getItem('contaleve_darkmode') === 'true') { document.documentElement.classList.add('dark'); }
     </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 min-h-screen pb-20 transition-colors duration-300">
@@ -29,16 +21,13 @@
                 <h1 class="text-xl font-bold text-gray-800 dark:text-white">ContaLeve</h1>
             </div>
             <div class="flex items-center gap-3">
-                <!-- NOVO: Botão Modo Escuro -->
-                <button onclick="alternarModo()" id="btn-modo" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" title="Alternar modo">
-                    <span id="icone-modo" class="text-xl">🌙</span>
-                </button>
-                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium hidden sm:block" id="user-greeting">Olá </span>
+                <button onclick="alternarModo()" id="btn-modo" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"><span id="icone-modo" class="text-xl">🌙</span></button>
+                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium hidden sm:block" id="user-greeting">Olá 👋</span>
                 <button onclick="fazerLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">Sair</button>
             </div>
         </div>
         <div class="max-w-4xl mx-auto px-4 pb-3 flex gap-2 sm:hidden">
-            <button onclick="abrirModalLeitura()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 rounded-lg shadow transition"> Leitura</button>
+            <button onclick="abrirModalLeitura()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">📊 Leitura</button>
             <button onclick="abrirModalFatura()" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">🧾 Fatura</button>
         </div>
     </nav>
@@ -47,17 +36,17 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Resumo deste mês</h2>
             <div class="flex gap-2 hidden sm:flex">
-                <button onclick="abrirModalLeitura()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">📊 Leitura</button>
+                <button onclick="abrirModalLeitura()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition"> Leitura</button>
                 <button onclick="abrirModalFatura()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">🧾 Fatura</button>
             </div>
         </div>
 
         <div id="card-insights" class="rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/30">
             <div class="flex items-start gap-4">
-                <div class="text-4xl">🚀</div>
+                <div class="text-4xl"></div>
                 <div class="flex-1">
                     <h3 class="font-bold text-lg mb-1 text-blue-800 dark:text-blue-200">Bem-vindo ao ContaLeve!</h3>
-                    <p class="text-sm text-blue-700 dark:text-blue-300">Começa por registar a tua primeira leitura ou fatura para veres os teus insights de poupança.</p>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">Começa por registar a tua primeira leitura ou fatura.</p>
                 </div>
             </div>
         </div>
@@ -77,11 +66,27 @@
             </div>
         </div>
 
+        <!-- NOVO: Secção de Faturas Reativada -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow mb-8">
+            <div class="flex border-b dark:border-gray-700">
+                <button onclick="mudarAba('pendentes')" id="aba-pendentes" class="flex-1 py-3 px-4 font-bold text-sm border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"> Pendentes</button>
+                <button onclick="mudarAba('historico')" id="aba-historico" class="flex-1 py-3 px-4 font-bold text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400">📜 Histórico</button>
+            </div>
+            <div id="conteudo-pendentes" class="p-6">
+                <ul id="lista-pendentes" class="space-y-3"><li class="text-gray-500 dark:text-gray-400 text-center py-4">A carregar...</li></ul>
+            </div>
+            <div id="conteudo-historico" class="p-6 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Faturas Pagas</h3>
+                    <p class="text-sm font-bold text-green-600 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full" id="total-gasto">Total: 0,00 €</p>
+                </div>
+                <ul id="lista-historico-faturas" class="space-y-3"><li class="text-gray-500 dark:text-gray-400 text-center py-4">A carregar...</li></ul>
+            </div>
+        </div>
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8">
             <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">📜 Histórico de Leituras</h3>
-            <ul id="lista-historico" class="space-y-3">
-                <li class="text-gray-500 dark:text-gray-400 text-center py-4">Ainda sem leituras. Regista a tua primeira!</li>
-            </ul>
+            <ul id="lista-historico" class="space-y-3"><li class="text-gray-500 dark:text-gray-400 text-center py-4">Ainda sem leituras. Regista a tua primeira!</li></ul>
         </div>
     </main>
 
@@ -106,7 +111,7 @@
     <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white"> Nova Fatura</h3>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">🧾 Nova Fatura</h3>
                 <button onclick="fecharModais()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl">&times;</button>
             </div>
             <div class="space-y-3">
@@ -175,19 +180,14 @@
             window.location.href = 'login.html';
         }
 
-        // NOVO: Sistema de Modo Escuro
         function alternarModo() {
             const html = document.documentElement;
             const icone = document.getElementById('icone-modo');
             const estaEscuro = html.classList.toggle('dark');
             localStorage.setItem('contaleve_darkmode', estaEscuro);
-            icone.innerText = estaEscuro ? '☀️' : '🌙';
+            icone.innerText = estaEscuro ? '️' : '🌙';
         }
-
-        // Atualizar o ícone ao carregar a página
-        if (localStorage.getItem('contaleve_darkmode') === 'true') {
-            document.getElementById('icone-modo').innerText = '☀️';
-        }
+        if (localStorage.getItem('contaleve_darkmode') === 'true') { document.getElementById('icone-modo').innerText = '☀️'; }
 
         function fecharModais() {
             document.getElementById('modalLeitura').classList.add('hidden');
@@ -195,6 +195,37 @@
         }
         function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
+
+        function mudarAba(aba) {
+            const pendentes = document.getElementById('conteudo-pendentes');
+            const historico = document.getElementById('conteudo-historico');
+            const abaPendentes = document.getElementById('aba-pendentes');
+            const abaHistorico = document.getElementById('aba-historico');
+            if (aba === 'pendentes') {
+                pendentes.classList.remove('hidden'); historico.classList.add('hidden');
+                abaPendentes.classList.add('border-b-2', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400'); abaPendentes.classList.remove('text-gray-500', 'dark:text-gray-400');
+                abaHistorico.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400'); abaHistorico.classList.add('text-gray-500', 'dark:text-gray-400');
+            } else {
+                pendentes.classList.add('hidden'); historico.classList.remove('hidden');
+                abaHistorico.classList.add('border-b-2', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400'); abaHistorico.classList.remove('text-gray-500', 'dark:text-gray-400');
+                abaPendentes.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400'); abaPendentes.classList.add('text-gray-500', 'dark:text-gray-400');
+                carregarHistoricoFaturas();
+            }
+        }
+
+        function diasRestantes(dataLimite) {
+            if (!dataLimite) return 999;
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+            const prazo = new Date(dataLimite);
+            return Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+        }
+
+        function formatarData(dataStr) {
+            if (!dataStr) return '--/--/----';
+            const partes = dataStr.split('-');
+            if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return dataStr;
+        }
 
         async function carregarDados() {
             try {
@@ -221,7 +252,7 @@
                     lista.innerHTML = '<li class="text-gray-500 dark:text-gray-400 text-center py-4">Ainda sem leituras. Regista a tua primeira!</li>';
                     return;
                 }
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                const icones = { agua: '💧', luz: '', gas: '🔥' };
                 const cores = { agua: 'bg-blue-50 dark:bg-blue-900/20', luz: 'bg-yellow-50 dark:bg-yellow-900/20', gas: 'bg-orange-50 dark:bg-orange-900/20' };
                 lista.innerHTML = dados.map(d => `
                     <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
@@ -235,6 +266,80 @@
             } catch (e) { console.error('Erro:', e); }
         }
 
+        // NOVO: Carregar Faturas Pendentes
+        async function carregarPendentes() {
+            try {
+                const resposta = await fetch('/api/pendentes?user_id=' + userId);
+                const dados = await resposta.json();
+                const lista = document.getElementById('lista-pendentes');
+                if (dados.length === 0) {
+                    lista.innerHTML = '<li class="text-green-600 dark:text-green-400 text-center py-4 font-bold">✅ Não tens faturas pendentes!</li>';
+                    return;
+                }
+                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                lista.innerHTML = dados.map(f => {
+                    const dias = diasRestantes(f.data_limite);
+                    let corFundo = 'bg-gray-50 dark:bg-gray-700/50';
+                    let aviso = '';
+                    if (dias < 0) { corFundo = 'bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500'; aviso = `⚠️ Atrasada há ${Math.abs(dias)} dias!`; }
+                    else if (dias <= 3) { corFundo = 'bg-red-50 dark:bg-red-900/20 border-l-4 border-orange-500'; aviso = `🔥 Vence em ${dias} dia(s)!`; }
+                    else if (dias <= 7) { corFundo = 'bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500'; aviso = `⏳ Vence em ${dias} dias`; }
+
+                    return `
+                    <li class="flex justify-between items-center p-4 rounded-lg ${corFundo} shadow-sm">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">${icones[f.tipo] || '🧾'}</span>
+                                <p class="font-bold text-gray-800 dark:text-white">${f.fornecedor}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Prazo: ${formatarData(f.data_limite)} ${aviso ? '- <b class="text-red-600 dark:text-red-400">'+aviso+'</b>' : ''}</p>
+                            <p class="text-xs font-mono text-gray-400 mt-1">Ref: ${f.referencia_pagamento || '---'}</p>
+                        </div>
+                        <div class="text-right flex flex-col items-end gap-2">
+                            <p class="text-xl font-bold text-gray-800 dark:text-white">${f.valor_total.toFixed(2)}€</p>
+                            <button onclick="marcarPaga('${f.id}')" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-3 rounded-full transition">Pagar</button>
+                        </div>
+                    </li>`;
+                }).join('');
+            } catch (e) { console.error('Erro:', e); }
+        }
+
+        // NOVO: Carregar Histórico de Faturas
+        async function carregarHistoricoFaturas() {
+            try {
+                const resposta = await fetch('/api/historico-faturas?user_id=' + userId);
+                const dados = await resposta.json();
+                const lista = document.getElementById('lista-historico-faturas');
+                if (dados.length === 0) {
+                    lista.innerHTML = '<li class="text-gray-500 dark:text-gray-400 text-center py-4">Ainda não pagaste nenhuma fatura.</li>';
+                    document.getElementById('total-gasto').innerText = 'Total: 0,00 €';
+                    return;
+                }
+                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
+                let total = 0;
+                lista.innerHTML = dados.map(f => {
+                    total += f.valor_total || 0;
+                    return `
+                    <li class="flex justify-between items-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">${icones[f.tipo] || '🧾'}</span>
+                            <div><p class="font-bold text-gray-800 dark:text-white">${f.fornecedor}</p><p class="text-xs text-gray-500 dark:text-gray-400">${formatarData(f.data_fatura)}</p></div>
+                        </div>
+                        <p class="text-lg font-bold text-green-700 dark:text-green-400">${f.valor_total.toFixed(2)}€</p>
+                    </li>`;
+                }).join('');
+                document.getElementById('total-gasto').innerText = `Total: ${total.toFixed(2)} €`;
+            } catch (e) { console.error('Erro:', e); }
+        }
+
+        async function marcarPaga(id) {
+            if(!confirm('Confirmas que pagaste esta fatura?')) return;
+            try {
+                await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+                carregarPendentes();
+            } catch (e) { alert('Erro ao marcar.'); }
+        }
+
         async function guardarLeitura() {
             const tipo = document.getElementById('tipoContador').value;
             const valor = document.getElementById('valorContador').value;
@@ -242,11 +347,7 @@
             if (!valor) { alert('️ Escreve um valor.'); return; }
             btn.innerText = 'A guardar...'; btn.disabled = true;
             try {
-                const resposta = await fetch('/api/leitura', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ user_id: userId, tipo: tipo, valor: valor })
-                });
+                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: userId, tipo: tipo, valor: valor }) });
                 const dados = await resposta.json();
                 if (dados.sucesso) {
                     alert('✅ Leitura guardada!');
@@ -279,6 +380,7 @@
                     document.getElementById('fat-valor').value = '';
                     document.getElementById('fat-consumo').value = '';
                     document.getElementById('fat-referencia').value = '';
+                    carregarPendentes(); // Atualiza a lista de pendentes
                 }
             } catch (err) { alert('Erro: ' + err.message); }
         }
@@ -286,6 +388,7 @@
         window.onload = () => { 
             carregarDados(); 
             carregarHistorico(); 
+            carregarPendentes(); // Carrega as pendentes ao iniciar
         };
     </script>
 </body>
