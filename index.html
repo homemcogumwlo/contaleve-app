@@ -17,22 +17,14 @@
                 <span class="text-2xl">💧</span>
                 <h1 class="text-xl font-bold text-gray-800">ContaLeve</h1>
             </div>
-            <!-- NOVO: Saudação personalizada e Botão Sair -->
             <div class="flex items-center gap-3">
-                <span class="text-sm text-gray-600 font-medium hidden sm:block" id="user-greeting">Olá, Utilizador 👋</span>
-                <button onclick="fazerLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                    Sair
-                </button>
+                <span class="text-sm text-gray-600 font-medium hidden sm:block" id="user-greeting">Olá 👋</span>
+                <button onclick="fazerLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">Sair</button>
             </div>
         </div>
-        <!-- Botões de ação no telemóvel -->
         <div class="max-w-4xl mx-auto px-4 pb-3 flex gap-2 sm:hidden">
-            <button onclick="abrirModalLeitura()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">
-                📊 Leitura
-            </button>
-            <button onclick="abrirModalFatura()" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">
-                🧾 Fatura
-            </button>
+            <button onclick="abrirModalLeitura()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 rounded-lg shadow transition"> Leitura</button>
+            <button onclick="abrirModalFatura()" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">🧾 Fatura</button>
         </div>
     </nav>
 
@@ -40,22 +32,17 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Resumo deste mês</h2>
             <div class="flex gap-2 hidden sm:flex">
-                <button onclick="abrirModalLeitura()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                    📊 Leitura
-                </button>
-                <button onclick="abrirModalFatura()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                    🧾 Fatura
-                </button>
+                <button onclick="abrirModalLeitura()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">📊 Leitura</button>
+                <button onclick="abrirModalFatura()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">🧾 Fatura</button>
             </div>
         </div>
 
-        <!-- Card de Insights Inteligentes -->
-        <div id="card-insights" class="hidden rounded-xl shadow-lg p-6 mb-8 border-l-4">
+        <div id="card-insights" class="rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500 bg-blue-50">
             <div class="flex items-start gap-4">
-                <div class="text-4xl" id="insight-icon"></div>
+                <div class="text-4xl">🚀</div>
                 <div class="flex-1">
-                    <h3 class="font-bold text-lg mb-1" id="insight-titulo">Insights de Poupança</h3>
-                    <p class="text-sm" id="insight-mensagem">A carregar análise...</p>
+                    <h3 class="font-bold text-lg mb-1 text-blue-800">Bem-vindo ao ContaLeve!</h3>
+                    <p class="text-sm text-blue-700">Começa por registar a tua primeira leitura ou fatura para veres os teus insights de poupança.</p>
                 </div>
             </div>
         </div>
@@ -63,56 +50,22 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
                 <p class="text-gray-500 text-sm font-medium">Água</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">A carregar...</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">0 m³</p>
             </div>
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
                 <p class="text-gray-500 text-sm font-medium">Eletricidade</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">A carregar...</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">0 kWh</p>
             </div>
             <div class="bg-white rounded-xl shadow p-5 border-l-4 border-orange-500">
                 <p class="text-gray-500 text-sm font-medium">Gás</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">A carregar...</p>
-            </div>
-        </div>
-
-        <!-- Gráfico de Gastos Mensais -->
-        <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4"> Gastos Mensais (Faturas Pagas)</h3>
-            <canvas id="graficoGastos"></canvas>
-        </div>
-
-        <!-- Secção de Faturas com Abas -->
-        <div class="bg-white rounded-xl shadow mb-8">
-            <div class="flex border-b">
-                <button onclick="mudarAba('pendentes')" id="aba-pendentes" class="flex-1 py-3 px-4 font-bold text-sm border-b-2 border-blue-500 text-blue-600">
-                    ⏳ Pendentes
-                </button>
-                <button onclick="mudarAba('historico')" id="aba-historico" class="flex-1 py-3 px-4 font-bold text-sm text-gray-500 hover:text-gray-700">
-                    📜 Histórico
-                </button>
-            </div>
-
-            <div id="conteudo-pendentes" class="p-6">
-                <ul id="lista-pendentes" class="space-y-3">
-                    <li class="text-gray-500 text-center py-4">A carregar...</li>
-                </ul>
-            </div>
-
-            <div id="conteudo-historico" class="p-6 hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">Faturas Pagas</h3>
-                    <p class="text-sm font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full" id="total-gasto">Total: 0,00 €</p>
-                </div>
-                <ul id="lista-historico-faturas" class="space-y-3">
-                    <li class="text-gray-500 text-center py-4">A carregar...</li>
-                </ul>
+                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">0 kWh</p>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow p-6 mb-8">
             <h3 class="text-lg font-bold text-gray-800 mb-4">📜 Histórico de Leituras</h3>
             <ul id="lista-historico" class="space-y-3">
-                <li class="text-gray-500 text-center py-4">A carregar...</li>
+                <li class="text-gray-500 text-center py-4">Ainda sem leituras. Regista a tua primeira!</li>
             </ul>
         </div>
     </main>
@@ -145,7 +98,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select id="fat-tipo" class="block w-full border border-gray-300 rounded-lg p-3">
-                        <option value="agua">💧 Água</option>
+                        <option value="agua"> Água</option>
                         <option value="luz">⚡ Eletricidade</option>
                         <option value="gas">🔥 Gás</option>
                     </select>
@@ -195,26 +148,18 @@
     </div>
 
     <script>
-        //  O CADEADO: Verificar se está logado
+        // O TEU ID REAL
         const userId = localStorage.getItem('contaleve_user_id');
         const userName = localStorage.getItem('contaleve_user_nome');
 
-        if (!userId) {
-            // Se não tiver a "chave", manda para a porta de entrada
-            window.location.href = 'login.html';
-        } else {
-            // Se tiver a chave, mostra o nome dele
-            document.getElementById('user-greeting').innerText = 'Olá, ' + userName + ' 👋';
-        }
+        if (!userId) { window.location.href = 'login.html'; } 
+        else { document.getElementById('user-greeting').innerText = 'Olá, ' + userName + ' 👋'; }
 
-        // Função para Sair (apaga a chave)
         function fazerLogout() {
             localStorage.removeItem('contaleve_user_id');
             localStorage.removeItem('contaleve_user_nome');
             window.location.href = 'login.html';
         }
-
-        let graficoGastos;
 
         function fecharModais() {
             document.getElementById('modalLeitura').classList.add('hidden');
@@ -223,226 +168,9 @@
         function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
         function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
 
-        function mudarAba(aba) {
-            const pendentes = document.getElementById('conteudo-pendentes');
-            const historico = document.getElementById('conteudo-historico');
-            const abaPendentes = document.getElementById('aba-pendentes');
-            const abaHistorico = document.getElementById('aba-historico');
-
-            if (aba === 'pendentes') {
-                pendentes.classList.remove('hidden');
-                historico.classList.add('hidden');
-                abaPendentes.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaPendentes.classList.remove('text-gray-500');
-                abaHistorico.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaHistorico.classList.add('text-gray-500');
-            } else {
-                pendentes.classList.add('hidden');
-                historico.classList.remove('hidden');
-                abaHistorico.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaHistorico.classList.remove('text-gray-500');
-                abaPendentes.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaPendentes.classList.add('text-gray-500');
-                carregarHistoricoFaturas();
-            }
-        }
-
-        function diasRestantes(dataLimite) {
-            if (!dataLimite) return 999;
-            const hoje = new Date();
-            hoje.setHours(0,0,0,0);
-            const prazo = new Date(dataLimite);
-            const diffTime = prazo - hoje;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
-
-        function formatarData(dataStr) {
-            if (!dataStr) return '--/--/----';
-            const partes = dataStr.split('-');
-            if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return dataStr;
-        }
-
-        async function carregarInsights() {
-            try {
-                const resposta = await fetch('/api/insights');
-                const dados = await resposta.json();
-                
-                const card = document.getElementById('card-insights');
-                const mensagem = document.getElementById('insight-mensagem');
-                const titulo = document.getElementById('insight-titulo');
-                const icon = document.getElementById('insight-icon');
-                
-                card.classList.remove('hidden');
-                mensagem.innerText = dados.mensagem;
-                
-                if (dados.cor === 'green') {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-green-500 bg-green-50';
-                    titulo.innerText = 'Excelente trabalho! 🎉';
-                    titulo.className = 'font-bold text-lg mb-1 text-green-800';
-                    mensagem.className = 'text-sm text-green-700';
-                    icon.innerText = '📉';
-                } else if (dados.cor === 'red') {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-red-500 bg-red-50';
-                    titulo.innerText = 'Atenção aos consumos ⚠️';
-                    titulo.className = 'font-bold text-lg mb-1 text-red-800';
-                    mensagem.className = 'text-sm text-red-700';
-                    icon.innerText = '📈';
-                } else if (dados.cor === 'blue') {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500 bg-blue-50';
-                    titulo.innerText = 'Vamos começar! ';
-                    titulo.className = 'font-bold text-lg mb-1 text-blue-800';
-                    mensagem.className = 'text-sm text-blue-700';
-                    icon.innerText = '📊';
-                } else {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-gray-500 bg-gray-50';
-                    titulo.innerText = 'Insights de Poupança 🧠';
-                    titulo.className = 'font-bold text-lg mb-1 text-gray-800';
-                    mensagem.className = 'text-sm text-gray-700';
-                    icon.innerText = '';
-                }
-            } catch (e) { console.error('Erro ao carregar insights:', e); }
-        }
-
-        async function carregarGastosMensais() {
-            try {
-                const resposta = await fetch('/api/gastos-mensais');
-                const dados = await resposta.json();
-                
-                const meses = [...new Set(dados.map(d => d.mes))].sort();
-                const dadosAgua = meses.map(m => {
-                    const item = dados.find(d => d.mes === m && d.tipo === 'agua');
-                    return item ? item.total : 0;
-                });
-                const dadosLuz = meses.map(m => {
-                    const item = dados.find(d => d.mes === m && d.tipo === 'luz');
-                    return item ? item.total : 0;
-                });
-                const dadosGas = meses.map(m => {
-                    const item = dados.find(d => d.mes === m && d.tipo === 'gas');
-                    return item ? item.total : 0;
-                });
-
-                const mesesFormatados = meses.map(m => {
-                    const [ano, mes] = m.split('-');
-                    const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-                    return `${nomesMeses[parseInt(mes)-1]} ${ano}`;
-                });
-
-                const ctx = document.getElementById('graficoGastos').getContext('2d');
-                if (graficoGastos) {
-                    graficoGastos.destroy();
-                }
-                
-                graficoGastos = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: mesesFormatados,
-                        datasets: [
-                            { label: 'Água', data: dadosAgua, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 },
-                            { label: 'Luz', data: dadosLuz, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderColor: 'rgb(234, 179, 8)', borderWidth: 1 },
-                            { label: 'Gás', data: dadosGas, backgroundColor: 'rgba(249, 115, 22, 0.8)', borderColor: 'rgb(249, 115, 22)', borderWidth: 1 }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { position: 'top' } },
-                        scales: { y: { beginAtZero: true, ticks: { callback: v => v + '€' } } }
-                    }
-                });
-            } catch (e) { console.error('Erro ao carregar gastos:', e); }
-        }
-
-        async function carregarPendentes() {
-            try {
-                const resposta = await fetch('/api/pendentes');
-                const dados = await resposta.json();
-                const lista = document.getElementById('lista-pendentes');
-                
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-green-600 text-center py-4 font-bold">✅ Não tens faturas pendentes!</li>';
-                    return;
-                }
-
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
-                
-                lista.innerHTML = dados.map(f => {
-                    const dias = diasRestantes(f.data_limite);
-                    let corFundo = 'bg-gray-50';
-                    let aviso = '';
-
-                    if (dias < 0) { corFundo = 'bg-red-100 border-l-4 border-red-500'; aviso = `⚠️ Atrasada há ${Math.abs(dias)} dias!`; }
-                    else if (dias <= 3) { corFundo = 'bg-red-50 border-l-4 border-orange-500'; aviso = `🔥 Vence em ${dias} dia(s)!`; }
-                    else if (dias <= 7) { corFundo = 'bg-yellow-50 border-l-4 border-yellow-500'; aviso = ` Vence em ${dias} dias`; }
-
-                    return `
-                    <li class="flex justify-between items-center p-4 rounded-lg ${corFundo} shadow-sm">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">${icones[f.tipo] || '🧾'}</span>
-                                <p class="font-bold text-gray-800">${f.fornecedor}</p>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Prazo: ${formatarData(f.data_limite)} ${aviso ? '- <b>'+aviso+'</b>' : ''}</p>
-                            <p class="text-xs font-mono text-gray-400 mt-1">Ref: ${f.referencia_pagamento || '---'}</p>
-                        </div>
-                        <div class="text-right flex flex-col items-end gap-2">
-                            <p class="text-xl font-bold text-gray-800">${f.valor_total.toFixed(2)}€</p>
-                            <button onclick="marcarPaga('${f.id}')" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-3 rounded-full transition">
-                                Pagar
-                            </button>
-                        </div>
-                    </li>`;
-                }).join('');
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function carregarHistoricoFaturas() {
-            try {
-                const resposta = await fetch('/api/historico-faturas');
-                const dados = await resposta.json();
-                const lista = document.getElementById('lista-historico-faturas');
-                
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Ainda não pagaste nenhuma fatura.</li>';
-                    document.getElementById('total-gasto').innerText = 'Total: 0,00 €';
-                    return;
-                }
-
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
-                let total = 0;
-
-                lista.innerHTML = dados.map(f => {
-                    total += f.valor_total || 0;
-                    return `
-                    <li class="flex justify-between items-center p-3 rounded-lg bg-green-50 border-l-4 border-green-500">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl">${icones[f.tipo] || ''}</span>
-                            <div>
-                                <p class="font-bold text-gray-800">${f.fornecedor}</p>
-                                <p class="text-xs text-gray-500">${formatarData(f.data_fatura)}</p>
-                            </div>
-                        </div>
-                        <p class="text-lg font-bold text-green-700">${f.valor_total.toFixed(2)}€</p>
-                    </li>`;
-                }).join('');
-
-                document.getElementById('total-gasto').innerText = `Total: ${total.toFixed(2)} €`;
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function marcarPaga(id) {
-            if(!confirm('Confirmas que pagaste esta fatura?')) return;
-            try {
-                await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
-                carregarPendentes();
-                carregarGastosMensais();
-                carregarInsights();
-            } catch (e) { alert('Erro ao marcar.'); }
-        }
-
         async function carregarDados() {
             try {
-                const resposta = await fetch('/api/leituras');
+                const resposta = await fetch('/api/leituras?user_id=' + userId);
                 const dados = await resposta.json();
                 let agua = '0 m³', luz = '0 kWh', gas = '0 kWh';
                 dados.forEach(d => {
@@ -458,11 +186,11 @@
 
         async function carregarHistorico() {
             try {
-                const resposta = await fetch('/api/historico');
+                const resposta = await fetch('/api/historico?user_id=' + userId);
                 const dados = await resposta.json();
                 const lista = document.getElementById('lista-historico');
                 if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
+                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Ainda sem leituras. Regista a tua primeira!</li>';
                     return;
                 }
                 const icones = { agua: '💧', luz: '', gas: '🔥' };
@@ -471,10 +199,7 @@
                     <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
                         <div class="flex items-center gap-3">
                             <span class="text-xl">${icones[d.tipo]}</span>
-                            <div>
-                                <p class="font-bold text-gray-800 capitalize">${d.tipo}</p>
-                                <p class="text-xs text-gray-500">${d.data_leitura}</p>
-                            </div>
+                            <div><p class="font-bold text-gray-800 capitalize">${d.tipo}</p><p class="text-xs text-gray-500">${d.data_leitura}</p></div>
                         </div>
                         <p class="font-bold text-gray-800">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
                     </li>
@@ -486,14 +211,19 @@
             const tipo = document.getElementById('tipoContador').value;
             const valor = document.getElementById('valorContador').value;
             const btn = document.getElementById('btnGuardar');
-            if (!valor) { alert('️ Escreve um valor.'); return; }
+            if (!valor) { alert('⚠️ Escreve um valor.'); return; }
             btn.innerText = 'A guardar...'; btn.disabled = true;
             try {
-                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
+                const resposta = await fetch('/api/leitura', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ user_id: userId, tipo: tipo, valor: valor })
+                });
                 const dados = await resposta.json();
                 if (dados.sucesso) {
-                    alert('✅ Guardado!');
+                    alert('✅ Leitura guardada!');
                     fecharModais();
+                    document.getElementById('valorContador').value = '';
                     carregarDados();
                     carregarHistorico();
                 }
@@ -503,6 +233,7 @@
 
         async function guardarFatura() {
             const dados = {
+                user_id: userId,
                 tipo: document.getElementById('fat-tipo').value,
                 fornecedor: document.getElementById('fat-fornecedor').value,
                 valor: parseFloat(document.getElementById('fat-valor').value) || 0,
@@ -511,14 +242,15 @@
                 data_limite: document.getElementById('fat-limite').value,
                 referencia: document.getElementById('fat-referencia').value
             };
-            if (!dados.valor || !dados.data_fatura) { alert('⚠️ Preenche o Valor e a Data.'); return; }
+            if (!dados.valor || !dados.data_fatura) { alert('️ Preenche o Valor e a Data.'); return; }
             try {
                 const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) });
                 if (resposta.ok) {
                     alert('🎉 Fatura guardada!');
                     fecharModais();
                     document.getElementById('fat-valor').value = '';
-                    carregarPendentes();
+                    document.getElementById('fat-consumo').value = '';
+                    document.getElementById('fat-referencia').value = '';
                 }
             } catch (err) { alert('Erro: ' + err.message); }
         }
@@ -526,9 +258,6 @@
         window.onload = () => { 
             carregarDados(); 
             carregarHistorico(); 
-            carregarPendentes(); 
-            carregarGastosMensais();
-            carregarInsights();
         };
     </script>
 </body>
