@@ -124,9 +124,10 @@
                     msgErro.innerText = dados.erro;
                     msgErro.classList.remove('hidden');
                 }
-            } catch (err) {
-                msgErro.innerText = 'Erro de conexão.';
-                msgErro.classList.remove('hidden');
+       catch (err) {
+       msgErro.innerText = 'Erro: ' + err.message;
+       msgErro.classList.remove('hidden');
+   }
             } finally {
                 btn.innerText = modoAtual === 'login' ? 'Entrar' : 'Criar Conta Grátis';
                 btn.disabled = false;
