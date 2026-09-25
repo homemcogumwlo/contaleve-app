@@ -3,533 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ContaLeve</title>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <title>ContaLeve - Entrar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen pb-20">
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen flex items-center justify-center p-4">
 
-    <nav class="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">💧</span>
-                <h1 class="text-xl font-bold text-gray-800">ContaLeve</h1>
-            </div>
-            <!-- NOVO: Saudação personalizada e Botão Sair -->
-            <div class="flex items-center gap-3">
-                <span class="text-sm text-gray-600 font-medium hidden sm:block" id="user-greeting">Olá, Utilizador 👋</span>
-                <button onclick="fazerLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                    Sair
-                </button>
-            </div>
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-2">💧</div>
+            <h1 class="text-3xl font-bold text-gray-800">ContaLeve</h1>
+            <p class="text-gray-500 mt-2">As tuas contas, leves como uma pluma.</p>
         </div>
-        <!-- Botões de ação no telemóvel -->
-        <div class="max-w-4xl mx-auto px-4 pb-3 flex gap-2 sm:hidden">
-            <button onclick="abrirModalLeitura()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">
-                📊 Leitura
+
+        <!-- Abas Login / Registo -->
+        <div class="flex mb-6 border-b">
+            <button onclick="mudarAba('login')" id="aba-login" class="flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600">Entrar</button>
+            <button onclick="mudarAba('registo')" id="aba-registo" class="flex-1 py-2 font-bold text-gray-400">Criar Conta</button>
+        </div>
+
+        <!-- Formulário -->
+        <form id="formAuth" onsubmit="handleAuth(event)" class="space-y-4">
+            <div id="campo-nome" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">O teu nome</label>
+                <input type="text" id="nome" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            
+            <!-- NOVO: Campo de Password com Olhinho -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <div class="relative">
+                    <input type="password" id="senha" required minlength="4" class="w-full border border-gray-300 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <button type="button" onclick="toggleSenha()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="mensagem-erro" class="hidden text-red-600 text-sm text-center bg-red-50 p-2 rounded"></div>
+
+            <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition">
+                Entrar
             </button>
-            <button onclick="abrirModalFatura()" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg shadow transition">
-                🧾 Fatura
-            </button>
-        </div>
-    </nav>
-
-    <main class="max-w-4xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Resumo deste mês</h2>
-            <div class="flex gap-2 hidden sm:flex">
-                <button onclick="abrirModalLeitura()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                    📊 Leitura
-                </button>
-                <button onclick="abrirModalFatura()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-full shadow transition">
-                    🧾 Fatura
-                </button>
-            </div>
-        </div>
-
-        <!-- Card de Insights Inteligentes -->
-        <div id="card-insights" class="hidden rounded-xl shadow-lg p-6 mb-8 border-l-4">
-            <div class="flex items-start gap-4">
-                <div class="text-4xl" id="insight-icon"></div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-lg mb-1" id="insight-titulo">Insights de Poupança</h3>
-                    <p class="text-sm" id="insight-mensagem">A carregar análise...</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
-                <p class="text-gray-500 text-sm font-medium">Água</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-agua">A carregar...</p>
-            </div>
-            <div class="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
-                <p class="text-gray-500 text-sm font-medium">Eletricidade</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-luz">A carregar...</p>
-            </div>
-            <div class="bg-white rounded-xl shadow p-5 border-l-4 border-orange-500">
-                <p class="text-gray-500 text-sm font-medium">Gás</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1" id="val-gas">A carregar...</p>
-            </div>
-        </div>
-
-        <!-- Gráfico de Gastos Mensais -->
-        <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4"> Gastos Mensais (Faturas Pagas)</h3>
-            <canvas id="graficoGastos"></canvas>
-        </div>
-
-        <!-- Secção de Faturas com Abas -->
-        <div class="bg-white rounded-xl shadow mb-8">
-            <div class="flex border-b">
-                <button onclick="mudarAba('pendentes')" id="aba-pendentes" class="flex-1 py-3 px-4 font-bold text-sm border-b-2 border-blue-500 text-blue-600">
-                    ⏳ Pendentes
-                </button>
-                <button onclick="mudarAba('historico')" id="aba-historico" class="flex-1 py-3 px-4 font-bold text-sm text-gray-500 hover:text-gray-700">
-                    📜 Histórico
-                </button>
-            </div>
-
-            <div id="conteudo-pendentes" class="p-6">
-                <ul id="lista-pendentes" class="space-y-3">
-                    <li class="text-gray-500 text-center py-4">A carregar...</li>
-                </ul>
-            </div>
-
-            <div id="conteudo-historico" class="p-6 hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">Faturas Pagas</h3>
-                    <p class="text-sm font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full" id="total-gasto">Total: 0,00 €</p>
-                </div>
-                <ul id="lista-historico-faturas" class="space-y-3">
-                    <li class="text-gray-500 text-center py-4">A carregar...</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">📜 Histórico de Leituras</h3>
-            <ul id="lista-historico" class="space-y-3">
-                <li class="text-gray-500 text-center py-4">A carregar...</li>
-            </ul>
-        </div>
-    </main>
-
-    <!-- MODAL: Leitura Manual -->
-    <div id="modalLeitura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Registar Leitura</h3>
-            <select id="tipoContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-4">
-                <option value="agua">💧 Água</option>
-                <option value="luz">⚡ Eletricidade</option>
-                <option value="gas">🔥 Gás</option>
-            </select>
-            <input type="number" id="valorContador" class="block w-full border border-gray-300 rounded-lg p-3 mb-6" placeholder="Valor do contador">
-            <div class="flex justify-end gap-3">
-                <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
-                <button id="btnGuardar" onclick="guardarLeitura()" class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: Nova Fatura -->
-    <div id="modalFatura" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">🧾 Nova Fatura</h3>
-                <button onclick="fecharModais()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                    <select id="fat-tipo" class="block w-full border border-gray-300 rounded-lg p-3">
-                        <option value="agua">💧 Água</option>
-                        <option value="luz">⚡ Eletricidade</option>
-                        <option value="gas">🔥 Gás</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
-                    <select id="fat-fornecedor" class="block w-full border border-gray-300 rounded-lg p-3">
-                        <option value="EDP">EDP</option>
-                        <option value="Galp">Galp</option>
-                        <option value="Endesa">Endesa</option>
-                        <option value="Goldenergy">Goldenergy</option>
-                        <option value="Águas de Portugal">Águas de Portugal</option>
-                        <option value="EPAL">EPAL</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Valor (€)</label>
-                        <input type="number" step="0.01" id="fat-valor" class="block w-full border border-gray-300 rounded-lg p-3" placeholder="0.00">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Consumo</label>
-                        <input type="number" id="fat-consumo" class="block w-full border border-gray-300 rounded-lg p-3" placeholder="0">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Fatura</label>
-                        <input type="date" id="fat-data" class="block w-full border border-gray-300 rounded-lg p-3">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Prazo Limite</label>
-                        <input type="date" id="fat-limite" class="block w-full border border-gray-300 rounded-lg p-3">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Referência Multibanco</label>
-                    <input type="text" id="fat-referencia" class="block w-full border border-gray-300 rounded-lg p-3 font-mono tracking-wider" placeholder="123 456 789">
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="fecharModais()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
-                <button onclick="guardarFatura()" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md">Guardar Fatura</button>
-            </div>
-        </div>
+        </form>
     </div>
 
     <script>
-        //  O CADEADO: Verificar se está logado
-        const userId = localStorage.getItem('contaleve_user_id');
-        const userName = localStorage.getItem('contaleve_user_nome');
+        let modoAtual = 'login';
 
-        if (!userId) {
-            // Se não tiver a "chave", manda para a porta de entrada
-            window.location.href = 'login.html';
-        } else {
-            // Se tiver a chave, mostra o nome dele
-            document.getElementById('user-greeting').innerText = 'Olá, ' + userName + ' 👋';
-        }
-
-        // Função para Sair (apaga a chave)
-        function fazerLogout() {
-            localStorage.removeItem('contaleve_user_id');
-            localStorage.removeItem('contaleve_user_nome');
-            window.location.href = 'login.html';
-        }
-
-        let graficoGastos;
-
-        function fecharModais() {
-            document.getElementById('modalLeitura').classList.add('hidden');
-            document.getElementById('modalFatura').classList.add('hidden');
-        }
-        function abrirModalLeitura() { document.getElementById('modalLeitura').classList.remove('hidden'); }
-        function abrirModalFatura() { document.getElementById('modalFatura').classList.remove('hidden'); }
-
-        function mudarAba(aba) {
-            const pendentes = document.getElementById('conteudo-pendentes');
-            const historico = document.getElementById('conteudo-historico');
-            const abaPendentes = document.getElementById('aba-pendentes');
-            const abaHistorico = document.getElementById('aba-historico');
-
-            if (aba === 'pendentes') {
-                pendentes.classList.remove('hidden');
-                historico.classList.add('hidden');
-                abaPendentes.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaPendentes.classList.remove('text-gray-500');
-                abaHistorico.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaHistorico.classList.add('text-gray-500');
+        // NOVO: Função para mostrar/esconder password
+        function toggleSenha() {
+            const input = document.getElementById('senha');
+            if (input.type === 'password') {
+                input.type = 'text';
             } else {
-                pendentes.classList.add('hidden');
-                historico.classList.remove('hidden');
-                abaHistorico.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaHistorico.classList.remove('text-gray-500');
-                abaPendentes.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
-                abaPendentes.classList.add('text-gray-500');
-                carregarHistoricoFaturas();
+                input.type = 'password';
             }
         }
 
-        function diasRestantes(dataLimite) {
-            if (!dataLimite) return 999;
-            const hoje = new Date();
-            hoje.setHours(0,0,0,0);
-            const prazo = new Date(dataLimite);
-            const diffTime = prazo - hoje;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        function mudarAba(modo) {
+            modoAtual = modo;
+            const campoNome = document.getElementById('campo-nome');
+            const btnSubmit = document.getElementById('btn-submit');
+            const abaLogin = document.getElementById('aba-login');
+            const abaRegisto = document.getElementById('aba-registo');
+            const msgErro = document.getElementById('mensagem-erro');
+            
+            msgErro.classList.add('hidden');
+
+            if (modo === 'registo') {
+                campoNome.classList.remove('hidden');
+                btnSubmit.innerText = 'Criar Conta Grátis';
+                abaRegisto.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaRegisto.classList.remove('text-gray-400');
+                abaLogin.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaLogin.classList.add('text-gray-400');
+            } else {
+                campoNome.classList.add('hidden');
+                btnSubmit.innerText = 'Entrar';
+                abaLogin.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaLogin.classList.remove('text-gray-400');
+                abaRegisto.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                abaRegisto.classList.add('text-gray-400');
+            }
         }
 
-        function formatarData(dataStr) {
-            if (!dataStr) return '--/--/----';
-            const partes = dataStr.split('-');
-            if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return dataStr;
-        }
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const nome = document.getElementById('nome').value;
+            const btn = document.getElementById('btn-submit');
+            const msgErro = document.getElementById('mensagem-erro');
 
-        async function carregarInsights() {
+            btn.innerText = 'A processar...';
+            btn.disabled = true;
+            msgErro.classList.add('hidden');
+
             try {
-                const resposta = await fetch('/api/insights');
-                const dados = await resposta.json();
-                
-                const card = document.getElementById('card-insights');
-                const mensagem = document.getElementById('insight-mensagem');
-                const titulo = document.getElementById('insight-titulo');
-                const icon = document.getElementById('insight-icon');
-                
-                card.classList.remove('hidden');
-                mensagem.innerText = dados.mensagem;
-                
-                if (dados.cor === 'green') {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-green-500 bg-green-50';
-                    titulo.innerText = 'Excelente trabalho! 🎉';
-                    titulo.className = 'font-bold text-lg mb-1 text-green-800';
-                    mensagem.className = 'text-sm text-green-700';
-                    icon.innerText = '📉';
-                } else if (dados.cor === 'red') {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-red-500 bg-red-50';
-                    titulo.innerText = 'Atenção aos consumos ⚠️';
-                    titulo.className = 'font-bold text-lg mb-1 text-red-800';
-                    mensagem.className = 'text-sm text-red-700';
-                    icon.innerText = '📈';
-                } else if (dados.cor === 'blue') {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500 bg-blue-50';
-                    titulo.innerText = 'Vamos começar! ';
-                    titulo.className = 'font-bold text-lg mb-1 text-blue-800';
-                    mensagem.className = 'text-sm text-blue-700';
-                    icon.innerText = '📊';
-                } else {
-                    card.className = 'rounded-xl shadow-lg p-6 mb-8 border-l-4 border-gray-500 bg-gray-50';
-                    titulo.innerText = 'Insights de Poupança 🧠';
-                    titulo.className = 'font-bold text-lg mb-1 text-gray-800';
-                    mensagem.className = 'text-sm text-gray-700';
-                    icon.innerText = '';
-                }
-            } catch (e) { console.error('Erro ao carregar insights:', e); }
-        }
-
-        async function carregarGastosMensais() {
-            try {
-                const resposta = await fetch('/api/gastos-mensais');
-                const dados = await resposta.json();
-                
-                const meses = [...new Set(dados.map(d => d.mes))].sort();
-                const dadosAgua = meses.map(m => {
-                    const item = dados.find(d => d.mes === m && d.tipo === 'agua');
-                    return item ? item.total : 0;
-                });
-                const dadosLuz = meses.map(m => {
-                    const item = dados.find(d => d.mes === m && d.tipo === 'luz');
-                    return item ? item.total : 0;
-                });
-                const dadosGas = meses.map(m => {
-                    const item = dados.find(d => d.mes === m && d.tipo === 'gas');
-                    return item ? item.total : 0;
+                const resposta = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acao: modoAtual, email, senha, nome })
                 });
 
-                const mesesFormatados = meses.map(m => {
-                    const [ano, mes] = m.split('-');
-                    const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-                    return `${nomesMeses[parseInt(mes)-1]} ${ano}`;
-                });
-
-                const ctx = document.getElementById('graficoGastos').getContext('2d');
-                if (graficoGastos) {
-                    graficoGastos.destroy();
-                }
-                
-                graficoGastos = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: mesesFormatados,
-                        datasets: [
-                            { label: 'Água', data: dadosAgua, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 },
-                            { label: 'Luz', data: dadosLuz, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderColor: 'rgb(234, 179, 8)', borderWidth: 1 },
-                            { label: 'Gás', data: dadosGas, backgroundColor: 'rgba(249, 115, 22, 0.8)', borderColor: 'rgb(249, 115, 22)', borderWidth: 1 }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { position: 'top' } },
-                        scales: { y: { beginAtZero: true, ticks: { callback: v => v + '€' } } }
-                    }
-                });
-            } catch (e) { console.error('Erro ao carregar gastos:', e); }
-        }
-
-        async function carregarPendentes() {
-            try {
-                const resposta = await fetch('/api/pendentes');
                 const dados = await resposta.json();
-                const lista = document.getElementById('lista-pendentes');
-                
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-green-600 text-center py-4 font-bold">✅ Não tens faturas pendentes!</li>';
-                    return;
-                }
 
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
-                
-                lista.innerHTML = dados.map(f => {
-                    const dias = diasRestantes(f.data_limite);
-                    let corFundo = 'bg-gray-50';
-                    let aviso = '';
-
-                    if (dias < 0) { corFundo = 'bg-red-100 border-l-4 border-red-500'; aviso = `⚠️ Atrasada há ${Math.abs(dias)} dias!`; }
-                    else if (dias <= 3) { corFundo = 'bg-red-50 border-l-4 border-orange-500'; aviso = `🔥 Vence em ${dias} dia(s)!`; }
-                    else if (dias <= 7) { corFundo = 'bg-yellow-50 border-l-4 border-yellow-500'; aviso = ` Vence em ${dias} dias`; }
-
-                    return `
-                    <li class="flex justify-between items-center p-4 rounded-lg ${corFundo} shadow-sm">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">${icones[f.tipo] || '🧾'}</span>
-                                <p class="font-bold text-gray-800">${f.fornecedor}</p>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Prazo: ${formatarData(f.data_limite)} ${aviso ? '- <b>'+aviso+'</b>' : ''}</p>
-                            <p class="text-xs font-mono text-gray-400 mt-1">Ref: ${f.referencia_pagamento || '---'}</p>
-                        </div>
-                        <div class="text-right flex flex-col items-end gap-2">
-                            <p class="text-xl font-bold text-gray-800">${f.valor_total.toFixed(2)}€</p>
-                            <button onclick="marcarPaga('${f.id}')" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-3 rounded-full transition">
-                                Pagar
-                            </button>
-                        </div>
-                    </li>`;
-                }).join('');
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function carregarHistoricoFaturas() {
-            try {
-                const resposta = await fetch('/api/historico-faturas');
-                const dados = await resposta.json();
-                const lista = document.getElementById('lista-historico-faturas');
-                
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Ainda não pagaste nenhuma fatura.</li>';
-                    document.getElementById('total-gasto').innerText = 'Total: 0,00 €';
-                    return;
-                }
-
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' };
-                let total = 0;
-
-                lista.innerHTML = dados.map(f => {
-                    total += f.valor_total || 0;
-                    return `
-                    <li class="flex justify-between items-center p-3 rounded-lg bg-green-50 border-l-4 border-green-500">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl">${icones[f.tipo] || ''}</span>
-                            <div>
-                                <p class="font-bold text-gray-800">${f.fornecedor}</p>
-                                <p class="text-xs text-gray-500">${formatarData(f.data_fatura)}</p>
-                            </div>
-                        </div>
-                        <p class="text-lg font-bold text-green-700">${f.valor_total.toFixed(2)}€</p>
-                    </li>`;
-                }).join('');
-
-                document.getElementById('total-gasto').innerText = `Total: ${total.toFixed(2)} €`;
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function marcarPaga(id) {
-            if(!confirm('Confirmas que pagaste esta fatura?')) return;
-            try {
-                await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
-                carregarPendentes();
-                carregarGastosMensais();
-                carregarInsights();
-            } catch (e) { alert('Erro ao marcar.'); }
-        }
-
-        async function carregarDados() {
-            try {
-                const resposta = await fetch('/api/leituras');
-                const dados = await resposta.json();
-                let agua = '0 m³', luz = '0 kWh', gas = '0 kWh';
-                dados.forEach(d => {
-                    if(d.tipo === 'agua') agua = d.valor_atual + ' ' + d.unidade;
-                    if(d.tipo === 'luz') luz = d.valor_atual + ' ' + d.unidade;
-                    if(d.tipo === 'gas') gas = d.valor_atual + ' ' + d.unidade;
-                });
-                document.getElementById('val-agua').innerText = agua;
-                document.getElementById('val-luz').innerText = luz;
-                document.getElementById('val-gas').innerText = gas;
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function carregarHistorico() {
-            try {
-                const resposta = await fetch('/api/historico');
-                const dados = await resposta.json();
-                const lista = document.getElementById('lista-historico');
-                if (dados.length === 0) {
-                    lista.innerHTML = '<li class="text-gray-500 text-center py-4">Sem leituras ainda.</li>';
-                    return;
-                }
-                const icones = { agua: '💧', luz: '', gas: '🔥' };
-                const cores = { agua: 'bg-blue-50', luz: 'bg-yellow-50', gas: 'bg-orange-50' };
-                lista.innerHTML = dados.map(d => `
-                    <li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl">${icones[d.tipo]}</span>
-                            <div>
-                                <p class="font-bold text-gray-800 capitalize">${d.tipo}</p>
-                                <p class="text-xs text-gray-500">${d.data_leitura}</p>
-                            </div>
-                        </div>
-                        <p class="font-bold text-gray-800">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
-                    </li>
-                `).join('');
-            } catch (e) { console.error('Erro:', e); }
-        }
-
-        async function guardarLeitura() {
-            const tipo = document.getElementById('tipoContador').value;
-            const valor = document.getElementById('valorContador').value;
-            const btn = document.getElementById('btnGuardar');
-            if (!valor) { alert('️ Escreve um valor.'); return; }
-            btn.innerText = 'A guardar...'; btn.disabled = true;
-            try {
-                const resposta = await fetch('/api/leitura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, valor: valor }) });
-                const dados = await resposta.json();
                 if (dados.sucesso) {
-                    alert('✅ Guardado!');
-                    fecharModais();
-                    carregarDados();
-                    carregarHistorico();
-                }
-            } catch (erro) { alert('Erro: ' + erro.message); }
-            finally { btn.innerText = 'Guardar'; btn.disabled = false; }
-        }
-
-        async function guardarFatura() {
-            const dados = {
-                tipo: document.getElementById('fat-tipo').value,
-                fornecedor: document.getElementById('fat-fornecedor').value,
-                valor: parseFloat(document.getElementById('fat-valor').value) || 0,
-                consumo: parseFloat(document.getElementById('fat-consumo').value) || 0,
-                data_fatura: document.getElementById('fat-data').value,
-                data_limite: document.getElementById('fat-limite').value,
-                referencia: document.getElementById('fat-referencia').value
-            };
-            if (!dados.valor || !dados.data_fatura) { alert('⚠️ Preenche o Valor e a Data.'); return; }
-            try {
-                const resposta = await fetch('/api/fatura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) });
-                if (resposta.ok) {
-                    alert('🎉 Fatura guardada!');
-                    fecharModais();
-                    document.getElementById('fat-valor').value = '';
-                    carregarPendentes();
-                }
-            } catch (err) { alert('Erro: ' + err.message); }
-        }
-
-        window.onload = () => { 
-            carregarDados(); 
-            carregarHistorico(); 
-            carregarPendentes(); 
-            carregarGastosMensais();
-            carregarInsights();
-        };
-    </script>
-</body>
-</html>
+                    localStorage.setItem('contaleve_user_id', dados.user_id);
+                    localStorage.setItem('contaleve_user_nome', dados.nome);
+                    window.location.href = 'index.html';
+                } else {
+                    msgErro.innerText = dados.erro
