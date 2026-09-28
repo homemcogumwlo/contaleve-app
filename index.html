@@ -353,14 +353,72 @@
             try { const resposta = await fetch('/api/leituras?user_id=' + userId); const dados = await resposta.json(); let agua = '0 m³', luz = '0 kWh', gas = '0 kWh'; dados.forEach(d => { if(d.tipo === 'agua') agua = d.valor_atual + ' ' + d.unidade; if(d.tipo === 'luz') luz = d.valor_atual + ' ' + d.unidade; if(d.tipo === 'gas') gas = d.valor_atual + ' ' + d.unidade; }); document.getElementById('val-agua').innerText = agua; document.getElementById('val-luz').innerText = luz; document.getElementById('val-gas').innerText = gas; } catch (e) { console.error('Erro:', e); }
         }
 
-        async function carregarHistorico() {
-            try {
-                const resposta = await fetch('/api/historico?user_id=' + userId); const dados = await resposta.json(); const lista = document.getElementById('lista-historico');
-                if (dados.length === 0) { lista.innerHTML = '<li class="text-gray-500 dark:text-gray-400 text-center py-4">Ainda sem leituras.</li>'; return; }
-                const icones = { agua: '💧', luz: '⚡', gas: '🔥' }; const cores = { agua: 'bg-blue-50 dark:bg-blue-900/20', luz: 'bg-yellow-50 dark:bg-yellow-900/20', gas: 'bg-orange-50 dark:bg-orange-900/20' };
-                lista.innerHTML = dados.map(d => `<li class="flex justify-between items-center p-3 rounded-lg ${cores[d.tipo]}"><div class="flex items-center gap-3"><span class="text-xl">${icones[d.tipo]}</span><div><p class="font-bold text-gray-800 dark:text-white capitalize">${d.tipo}</p><p class="text-xs text-gray-500 dark:text-gray-400">${d.data_leitura}</p></div></div><div class="flex items-center gap-3"><p class="font-bold text-gray-800 dark:text-white">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p><button onclick='apagarLeitura("${d.id}")' class="text-red-500 hover:text-red-700 p-1">🗑️</button><button onclick='editarLeitura("${d.id}", "${d.tipo}", ${d.valor_atual})' class="text-blue-500 hover:text-blue-700 p-1">✏️</button></div></li>`).join('');
-            } catch (e) { console.error('Erro:', e); }
+       async function carregarHistorico() {
+    try {
+        const resposta = await fetch('/api/historico?user_id=' + userId);
+        const dados = await resposta.json();
+        const lista = document.getElementById('lista-historico');
+        
+        if (dados.length === 0) {
+            lista.innerHTML = '<li class="text-gray-500 dark:text-gray-400 text-center py-4">Ainda sem leituras.</li>';
+            return;
         }
+
+        // Separar leituras por tipo
+        const leiturasAgua = dados.filter(d => d.tipo === 'agua');
+        const leiturasGas = dados.filter(d => d.tipo === 'gas');
+
+        let htmlFinal = '';
+
+        // Secção de Água
+        htmlFinal += '<li class="text-blue-600 dark:text-blue-400 font-bold text-sm uppercase tracking-wide pt-2 pb-1 border-b border-blue-200 dark:border-blue-800">💧 Leituras de Água</li>';
+        if (leiturasAgua.length === 0) {
+            htmlFinal += '<li class="text-gray-400 text-sm py-2 pl-2">Sem leituras de água.</li>';
+        } else {
+            htmlFinal += leiturasAgua.map(d => `
+                <li class="flex justify-between items-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">💧</span>
+                        <div>
+                            <p class="font-bold text-gray-800 dark:text-white">Água</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${d.data_leitura}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="font-bold text-gray-800 dark:text-white">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
+                        <button onclick='apagarLeitura("${d.id}")' class="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                        <button onclick='editarLeitura("${d.id}", "${d.tipo}", ${d.valor_atual})' class="text-blue-500 hover:text-blue-700 p-1">✏️</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Secção de Gás
+        htmlFinal += '<li class="text-orange-600 dark:text-orange-400 font-bold text-sm uppercase tracking-wide pt-4 pb-1 border-b border-orange-200 dark:border-orange-800">🔥 Leituras de Gás</li>';
+        if (leiturasGas.length === 0) {
+            htmlFinal += '<li class="text-gray-400 text-sm py-2 pl-2">Sem leituras de gás.</li>';
+        } else {
+            htmlFinal += leiturasGas.map(d => `
+                <li class="flex justify-between items-center p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">🔥</span>
+                        <div>
+                            <p class="font-bold text-gray-800 dark:text-white">Gás</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${d.data_leitura}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="font-bold text-gray-800 dark:text-white">${d.valor_atual} <span class="text-xs font-normal">${d.unidade}</span></p>
+                        <button onclick='apagarLeitura("${d.id}")' class="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                        <button onclick='editarLeitura("${d.id}", "${d.tipo}", ${d.valor_atual})' class="text-blue-500 hover:text-blue-700 p-1">✏️</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        lista.innerHTML = htmlFinal;
+    } catch (e) { console.error('Erro:', e); }
+}
 
         async function carregarPendentes() {
             try {
